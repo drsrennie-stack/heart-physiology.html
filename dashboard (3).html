@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Physiology — Review Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:       #2E2E2E;
+  --sage:        #6B8C74;
+  --sage-light:  #8AAF93;
+  --sage-bg:     #EEF4F0;
+  --sage-dark:   #4E6E57;
+  --cream:       #FFFFFF;
+  --cream-dark:  #F5F5F5;
+  --gray:        #999;
+  --gray-light:  #E0DDD8;
+  --white:       #FFFFFF;
+  --green:       #3A6B50;
+  --green-light: #E8F2EC;
+  --red:         #A33020;
+  --red-light:   #FDECEA;
+}
+
+html, body { min-height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--cream); color: var(--black); }
+
+/* HEADER */
+.header { background: #FFFFFF; padding: 0 28px; height: 58px; border: 1px solid var(--gray-light); display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--sage); position: sticky; top: 0; z-index: 100; }
+.header-left { display: flex; flex-direction: column; gap: 1px; }
+.unit-eyebrow { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--sage-dark); font-weight: 700; }
+.unit-title { font-family: 'Lora', serif; font-size: 18px; color: var(--black); }
+.last-updated { font-size: 11px; color: #666; }
+
+/* STATS */
+.stats-bar { background: var(--white); border-bottom: 1px solid var(--gray-light); padding: 0 28px; display: flex; }
+.stat { flex: 1; padding: 16px 16px; display: flex; flex-direction: column; gap: 3px; border-right: 1px solid var(--gray-light); }
+.stat:last-child { border-right: none; }
+.stat-value { font-family: 'Lora', serif; font-size: 28px; font-weight: 600; line-height: 1; }
+.stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); font-weight: 600; margin-top: 4px; }
+.stat.s-overdue  .stat-value { color: var(--red); }
+.stat.s-due      .stat-value { color: var(--sage-dark); }
+.stat.s-mastered .stat-value { color: var(--green); }
+
+/* PROGRESS */
+.progress-wrap { background: var(--white); border-bottom: 1px solid var(--gray-light); padding: 12px 28px 14px; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.progress-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); font-weight: 600; }
+.progress-pct { font-size: 10px; font-weight: 700; color: var(--sage-dark); }
+.progress-track { height: 5px; background: var(--gray-light); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sage-dark), var(--sage-light)); transition: width .8s ease; }
+
+/* LIST */
+.list-wrap { padding: 16px 28px 48px; display: flex; flex-direction: column; gap: 5px; }
+
+.section-label { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--sage); padding: 14px 4px 5px; margin-top: 4px; }
+.section-label:first-child { padding-top: 4px; }
+
+.concept-row {
+  background: var(--white); border: 1.5px solid var(--gray-light);
+  border-radius: 8px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.concept-row:hover { border-color: var(--sage); box-shadow: 0 2px 10px rgba(107,140,116,.1); }
+.concept-row.is-overdue  { background: var(--red-light);  border-color: #e0b8b4; }
+.concept-row.is-due      { background: var(--sage-bg);    border-color: var(--sage); }
+.concept-row.is-mastered { background: var(--green-light); border-color: #a8ccb8; }
+
+.concept-num { font-size: 11px; font-weight: 700; color: var(--gray); min-width: 24px; text-align: right; flex-shrink: 0; }
+.concept-name { font-size: 13.5px; font-weight: 500; flex: 1; line-height: 1.3; }
+.concept-row.is-overdue .concept-name { color: var(--red); }
+
+.concept-meta { font-size: 11px; color: var(--gray); text-align: right; flex-shrink: 0; line-height: 1.6; }
+.concept-meta strong { display: block; font-size: 9px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .07em; }
+
+/* BADGES */
+.badge { flex-shrink: 0; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.badge-notstarted { background: var(--cream-dark); color: #bbb; }
+.badge-future     { background: var(--sage-bg);    color: var(--sage-dark); }
+.badge-due        { background: var(--sage);        color: #fff; }
+.badge-overdue    { background: var(--red-light);   color: var(--red); border: 1px solid #e0b8b4; }
+.badge-mastered   { background: var(--green-light); color: var(--green); border: 1px solid #a8ccb8; }
+
+/* HELP BUTTON */
+.help-link { width: 30px; height: 30px; border-radius: 50%; background: var(--sage-bg); border: 1.5px solid var(--sage); color: var(--sage-dark); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; flex-shrink: 0; }
+.help-link:hover { background: var(--sage); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="unit-eyebrow">Heart Physiology</div>
+    <div class="unit-title">Review Dashboard</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="last-updated" id="last-updated"></div>
+    <a class="help-link" href="https://www.medmasterscollaborative.com/physiology-interactive-lecture-instructions"
+      target="_blank" rel="noopener" aria-label="Open course instructions in new tab"
+      title="Course instructions">?</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat s-overdue">
+    <div class="stat-value" id="stat-overdue">—</div>
+    <div class="stat-label">Overdue</div>
+  </div>
+  <div class="stat s-due">
+    <div class="stat-value" id="stat-due">—</div>
+    <div class="stat-label">Due Today</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="stat-upcoming">—</div>
+    <div class="stat-label">Coming Up</div>
+  </div>
+  <div class="stat s-mastered">
+    <div class="stat-value" id="stat-mastered">—</div>
+    <div class="stat-label">Mastered</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="stat-notstarted">—</div>
+    <div class="stat-label">Not Started</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-header">
+    <span class="progress-label">Overall Progress</span>
+    <span class="progress-pct" id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="list-wrap" id="concept-list"></div>
+
+<script>
+const CONCEPTS = [
+  // ── Section 1: Cardiac Muscle — Anatomy & Cell Types ──
+  { id: 'what_kinds_of_things_determine_the_pacemaker_rates_of_the_heart',       name: 'What kinds of things determine the pacemaker rates of the heart?' },
+  { id: 'contractile_cells_of_the_heart',                                        name: 'Contractile cells of the heart' },
+  { id: 'cardiac_muscle_fibers_micro_anatomy',                                   name: 'Cardiac muscle fibers — micro anatomy' },
+  { id: 'skeletal_muscle_versus_cardiac_muscle_similarities',                    name: 'Skeletal muscle versus cardiac muscle similarities' },
+  { id: 'skeletal_muscle_versus_cardiac_muscle_differences_1',                   name: 'Skeletal muscle versus cardiac muscle differences (1)' },
+  { id: 'skeletal_muscle_versus_cardiac_muscle_differences_2',                   name: 'Skeletal muscle versus cardiac muscle differences (2)' },
+  // ── Section 2: Electrical Activity & Action Potentials ──
+  { id: 'pacemaker_potential',                                                   name: 'Pacemaker potential' },
+  { id: 'depolarization_phase_of_an_action_potential',                           name: 'Depolarization phase of an action potential' },
+  { id: 'repolarization_phase_of_an_action_potential',                           name: 'Repolarization phase of an action potential' },
+  { id: 'sequence_of_activation_of_a_typical_cardiac_cell',                     name: 'Sequence of activation of a typical cardiac cell' },
+  { id: 'substances_that_alter_cardiac_muscle_contraction',                      name: 'Substances that alter cardiac muscle contraction (inotropy/chronotropy)' },
+  // ── Section 3: The EKG & Clinical Monitoring ──
+  { id: 'what_is_an_ekg',                                                        name: 'What is an EKG?' },
+  { id: 'ekg_waveforms_and_what_they_represent',                                 name: 'EKG waveforms and what they represent' },
+  { id: 'what_is_the_isoelectric_line',                                          name: 'What is the isoelectric line?' },
+  { id: 'ekg_abnormalities',                                                     name: 'EKG abnormalities' },
+  { id: 'what_is_important_about_the_st_segment',                                name: 'What is important about the ST segment?' },
+  { id: 'what_is_clinically_important_about_the_qt_interval',                   name: 'What is clinically important about the QT interval?' },
+  { id: 'what_is_a_stress_test',                                                 name: 'What is a stress test?' },
+  { id: 'what_is_a_holter_monitor_test',                                         name: 'What is a Holter monitor test?' },
+  // ── Section 4: The Cardiac Cycle ──
+  { id: 'what_is_a_single_cardiac_cycle',                                        name: 'What is a single cardiac cycle?' },
+  { id: 'what_is_systole_and_diastole',                                          name: 'What is systole and diastole?' },
+  { id: 'cardiac_cycle_step_1_ventricular_filling',                              name: 'Cardiac cycle step 1 — ventricular filling' },
+  { id: 'what_is_end_diastolic_volume',                                          name: 'What is end-diastolic volume?' },
+  { id: 'cardiac_cycle_step_2_isovolumetric_contraction',                        name: 'Cardiac cycle step 2 — isovolumetric contraction' },
+  { id: 'cardiac_cycle_step_3_ventricular_ejection',                             name: 'Cardiac cycle step 3 — ventricular ejection' },
+  { id: 'cardiac_cycle_step_4_isovolumetric_relaxation',                         name: 'Cardiac cycle step 4 — isovolumetric relaxation (early diastole)' },
+  { id: 'cardiac_cycle_overview',                                                name: 'Cardiac cycle overview' },
+  { id: 'important_points_about_the_cardiac_cycle',                              name: 'Important points about the cardiac cycle' },
+  { id: 'left_heart_versus_right_heart',                                         name: 'Left heart versus right heart' },
+  { id: 'what_is_end_systolic_volume',                                           name: 'What is end-systolic volume?' },
+  // ── Section 5: Heart Sounds & Auscultation ──
+  { id: 'what_is_auscultation',                                                  name: 'What is auscultation?' },
+  { id: 'what_are_the_typical_heart_sounds',                                     name: 'What are the typical heart sounds?' },
+  { id: 'valve_closure_heart_sounds_and_pressure_changes',                       name: 'Valve closure, heart sounds, and pressure changes' },
+  { id: 'where_can_we_best_hear_heart_sounds',                                   name: 'Where can we best hear heart sounds?' },
+  { id: 'heart_murmurs',                                                         name: 'Heart murmurs' },
+  { id: 'normal_heart_sounds_characteristics_and_mechanisms',                    name: 'Normal heart sounds — characteristics and mechanisms' },
+  // ── Section 6: Cardiac Output & Regulation ──
+  { id: 'what_is_cardiac_output',                                                name: 'What is cardiac output? What factors determine it?' },
+  { id: 'what_is_cardiac_reserve',                                               name: 'What is cardiac reserve?' },
+  { id: 'three_factors_that_regulate_stroke_volume',                             name: 'Three factors that regulate stroke volume' },
+  { id: 'summary_tables_cardiac_response',                                       name: 'Summary tables — cardiac response, blood flow, and cardiac output' },
+  // ── Section 7: Congenital Heart Defects ──
+  { id: 'congenital_heart_defects_patent_foramen_ovale',                         name: 'Congenital heart defects — patent foramen ovale' },
+  { id: 'congenital_heart_defects_patent_ductus_arteriosus',                     name: 'Congenital heart defects — patent ductus arteriosus' },
+  { id: 'congenital_heart_defects_coarctation_of_the_aorta',                    name: 'Congenital heart defects — coarctation of the aorta' },
+  { id: 'congenital_heart_defects_tetralogy_of_fallot',                          name: 'Congenital heart defects — tetralogy of Fallot' },
+  { id: 'congenital_heart_defects_ventricular_septal_defect',                   name: 'Congenital heart defects — ventricular septal defect' },
+  // ── Section 8: Heart Failure & Clinical Markers ──
+  { id: 'left_sided_heart_failure',                                              name: 'Left-sided heart failure' },
+  { id: 'right_sided_heart_failure',                                             name: 'Right-sided heart failure' },
+  { id: 'bnp_and_heart_failure',                                                 name: 'BNP and heart failure' },
+  { id: 'cardiac_enzymes_and_acute_mi',                                          name: 'Cardiac enzymes and acute MI' },
+  { id: 'age_related_changes_of_the_heart',                                      name: 'Age-related changes of the heart' },
+];
+
+const MASTERED_DAYS = 30;
+
+function getStatus(id) {
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem('srep_' + id)) || {}; } catch(e) {}
+  if (!s.reviewCount) return { type: 'notstarted' };
+  const now = Date.now();
+  const daysUntil = Math.round((s.nextReview - now) / 86400000);
+  if (s.intervalDays >= MASTERED_DAYS) return { type: 'mastered',  count: s.reviewCount };
+  if (daysUntil < 0)                   return { type: 'overdue',   count: s.reviewCount, daysOver: Math.abs(daysUntil), nextReview: s.nextReview };
+  if (daysUntil === 0)                 return { type: 'due',       count: s.reviewCount };
+  return                                      { type: 'future',    count: s.reviewCount, daysUntil, nextReview: s.nextReview };
+}
+
+function badge(st) {
+  if (st.type === 'notstarted') return '<div class="badge badge-notstarted">Not started</div>';
+  if (st.type === 'mastered')   return '<div class="badge badge-mastered">✓ Mastered</div>';
+  if (st.type === 'due')        return '<div class="badge badge-due">● Due today</div>';
+  if (st.type === 'overdue')    return '<div class="badge badge-overdue">↑ ' + st.daysOver + 'd overdue</div>';
+  return '<div class="badge badge-future">In ' + st.daysUntil + 'd</div>';
+}
+
+function meta(st) {
+  if (st.type === 'notstarted' || st.type === 'due') return '';
+  const cnt = st.count + ' review' + (st.count !== 1 ? 's' : '');
+  if (st.type === 'mastered') return '<div class="concept-meta">' + cnt + '</div>';
+  const d = new Date(st.nextReview).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (st.type === 'overdue') return '<div class="concept-meta"><strong>was due</strong>' + d + ' · ' + cnt + '</div>';
+  return '<div class="concept-meta"><strong>next review</strong>' + d + ' · ' + cnt + '</div>';
+}
+
+function rowClass(st) {
+  if (st.type === 'overdue')  return 'concept-row is-overdue';
+  if (st.type === 'due')      return 'concept-row is-due';
+  if (st.type === 'mastered') return 'concept-row is-mastered';
+  return 'concept-row';
+}
+
+function render() {
+  const list = document.getElementById('concept-list');
+  list.innerHTML = '';
+  const counts = { overdue: 0, due: 0, future: 0, mastered: 0, notstarted: 0 };
+
+  const items = CONCEPTS.map((c, i) => ({ ...c, i, st: getStatus(c.id) }));
+  const order = ['overdue','due','future','notstarted','mastered'];
+  items.sort((a, b) => {
+    const d = order.indexOf(a.st.type) - order.indexOf(b.st.type);
+    if (d !== 0) return d;
+    if (a.st.type === 'overdue') return b.st.daysOver - a.st.daysOver;
+    if (a.st.type === 'future')  return a.st.daysUntil - b.st.daysUntil;
+    return a.i - b.i;
+  });
+
+  const sectionLabels = {
+    overdue:    '↑ Overdue — review these now',
+    due:        '● Due today',
+    future:     'Scheduled — coming up',
+    notstarted: 'Not yet started',
+    mastered:   '✓ Mastered'
+  };
+
+  let lastSection = null;
+  items.forEach(({ name, st, i }) => {
+    counts[st.type]++;
+    if (st.type !== lastSection) {
+      const div = document.createElement('div');
+      div.className = 'section-label';
+      div.textContent = sectionLabels[st.type];
+      list.appendChild(div);
+      lastSection = st.type;
+    }
+    const row = document.createElement('div');
+    row.className = rowClass(st);
+    row.innerHTML = '<div class="concept-num">' + (i + 1) + '</div>' +
+      '<div class="concept-name">' + name + '</div>' +
+      meta(st) + badge(st);
+    list.appendChild(row);
+  });
+
+  document.getElementById('stat-overdue').textContent    = counts.overdue;
+  document.getElementById('stat-due').textContent        = counts.due;
+  document.getElementById('stat-upcoming').textContent   = counts.future;
+  document.getElementById('stat-mastered').textContent   = counts.mastered;
+  document.getElementById('stat-notstarted').textContent = counts.notstarted;
+
+  const touched = CONCEPTS.length - counts.notstarted;
+  const pct = Math.round((touched / CONCEPTS.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent  = pct + '%';
+  document.getElementById('last-updated').textContent  =
+    'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+render();
+</script>
+</body>
+</html>
