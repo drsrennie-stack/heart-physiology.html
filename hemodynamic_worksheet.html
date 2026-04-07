@@ -775,6 +775,63 @@
   .reasoning-dir.up { background: var(--green-tint); color: var(--green-text); }
   .reasoning-dir.dn { background: var(--red-tint); color: var(--red-text); }
 
+  /* ── Save Reminder Banner ────────────────────────── */
+  .save-reminder {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .save-reminder-text {
+    flex: 1;
+    min-width: 200px;
+  }
+  .save-reminder-text strong {
+    display: block;
+    color: #fff;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+  .save-reminder-text p {
+    color: #A8BFDD;
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+  .save-reminder-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .btn-save-now {
+    background: var(--terra);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 18px;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background var(--transition);
+    white-space: nowrap;
+  }
+  .btn-save-now:hover { background: var(--terra-dark); }
+  .save-timestamp {
+    font-size: 0.7rem;
+    color: #6B8AAD;
+    font-style: italic;
+    text-align: right;
+  }
+
   /* ── Print Button ─────────────────────────────────── */
   .print-bar {
     background: var(--white);
@@ -1097,6 +1154,21 @@
     <div class="section-banner">
       <h2>Part 3 · Practice Problems</h2>
       <p>25 problems. Complete all fields, then use the Print button to save your answer sheet for Canvas.</p>
+    </div>
+
+    <!-- Save Reminder Banner -->
+    <div class="save-reminder" role="note" aria-label="Save your progress">
+      <div class="save-reminder-text">
+        <strong>💾 Save your progress as you go</strong>
+        <p>This worksheet auto-saves in your browser on this device. If you need to step away, click <em>Save Progress PDF</em> to keep a copy of what you've done so far — you can always pick back up where you left off. When you're completely finished, save your final PDF and upload it to Canvas.</p>
+      </div>
+      <div class="save-reminder-actions">
+        <button type="button" class="btn-save-now" onclick="window.print()" aria-label="Save a PDF of your current progress">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Save Progress PDF
+        </button>
+        <span class="save-timestamp" id="save-timestamp" aria-live="polite"></span>
+      </div>
     </div>
 
     <div class="practice-header">
@@ -1847,6 +1919,11 @@ function saveData() {
       if (el) data[id] = el.value;
     });
     localStorage.setItem('hemo_worksheet_v1', JSON.stringify(data));
+    const ts = document.getElementById('save-timestamp');
+    if (ts) {
+      const now = new Date();
+      ts.textContent = 'Auto-saved ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
   } catch(e) { /* silently ignore */ }
 }
 
