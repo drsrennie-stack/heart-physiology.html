@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemodynamic Calculations Worksheet | Human Physiology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  /* ── Design Tokens ────────────────────────────────── */
+  :root {
+    --cream:      #FAF8F5;
+    --white:      #FFFFFF;
+    --text:       #1C1C1C;
+    --text-muted: #4A4A4A;
+    --text-light: #6B6259;
+    --border:     #DDD5CC;
+    --border-mid: #C4B9B0;
+    --terra:      #B84A1E;      /* 5.1:1 on cream — AA ✓ */
+    --terra-dark: #8B3512;      /* 7.3:1 on cream — AAA ✓ */
+    --terra-tint: #FDF0EB;
+    --terra-mid:  #F2D5C8;
+    --navy:       #1E3358;
+    --green-tint: #EAF5EE;
+    --green-text: #1A5C2A;      /* 7:1 on white — AAA ✓ */
+    --amber-tint: #FFF8E7;
+    --amber-text: #6B4700;      /* 7.4:1 on amber-tint — AAA ✓ */
+    --red-tint:   #FBE9E7;
+    --red-text:   #8B1A10;      /* 7.5:1 on red-tint — AAA ✓ */
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md:  0 2px 8px rgba(0,0,0,0.10);
+    --radius:     6px;
+    --radius-lg:  10px;
+    --font-body:  'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --transition: 150ms ease;
+  }
+
+  /* ── Reset & Base ─────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--cream);
+    min-height: 100vh;
+  }
+
+  /* ── Skip Link ────────────────────────────────────── */
+  .skip-link {
+    position: absolute;
+    top: -9999px;
+    left: 6px;
+    padding: 8px 16px;
+    background: var(--navy);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 0 0 var(--radius) var(--radius);
+    text-decoration: none;
+    z-index: 9999;
+  }
+  .skip-link:focus { top: 0; }
+
+  /* ── Focus Styles ─────────────────────────────────── */
+  :focus-visible {
+    outline: 3px solid var(--terra);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ── Page Header ──────────────────────────────────── */
+  .page-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 20px 24px 16px;
+  }
+  .page-header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .page-kicker {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #A8BFDD;
+    margin-bottom: 4px;
+  }
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: #A8BFDD;
+    margin-top: 4px;
+  }
+
+  /* ── Student Info Bar ─────────────────────────────── */
+  .student-bar {
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 24px;
+  }
+  .student-bar-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .student-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .student-field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #A8BFDD;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .student-field input {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: #fff;
+    min-width: 0;
+  }
+  .student-field input::placeholder { color: rgba(255,255,255,0.4); }
+  .student-field input:focus-visible {
+    outline: 2px solid #A8BFDD;
+    outline-offset: 1px;
+  }
+
+  /* ── Tab Navigation ───────────────────────────────── */
+  .tab-nav-wrapper {
+    background: var(--white);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .tab-nav {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    padding: 0 16px;
+    gap: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 14px 18px 11px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transition), border-color var(--transition);
+    margin-bottom: -2px;
+  }
+  .tab-btn:hover { color: var(--terra); }
+  .tab-btn[aria-selected="true"] {
+    color: var(--terra-dark);
+    border-bottom-color: var(--terra);
+    font-weight: 600;
+  }
+
+  /* ── Main Content ─────────────────────────────────── */
+  .main-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── Tab Panels ───────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section Banner ───────────────────────────────── */
+  .section-banner {
+    background: var(--terra-tint);
+    border-left: 4px solid var(--terra);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .section-banner h2 {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--terra-dark);
+    margin-bottom: 2px;
+  }
+  .section-banner p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Info Box (how to use) ────────────────────────── */
+  .info-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .info-box h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    margin-bottom: 10px;
+  }
+  .strategy-steps {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .strategy-steps li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .step-num {
+    background: var(--terra);
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Formula Table ────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    margin-bottom: 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    font-size: 0.875rem;
+  }
+  .ref-table caption {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    text-align: left;
+    padding: 14px 18px 10px;
+    background: var(--terra-tint);
+    border-bottom: 1px solid var(--terra-mid);
+  }
+  .ref-table th {
+    background: var(--terra-tint);
+    color: var(--terra-dark);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--terra-mid);
+  }
+  .ref-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:nth-child(even) td { background: rgba(250,248,245,0.6); }
+  .ref-table strong { color: var(--navy); }
+  .formula-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--terra-dark);
+    font-weight: 600;
+    background: var(--terra-tint);
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .range-badge {
+    display: inline-block;
+    background: var(--green-tint);
+    color: var(--green-text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  /* ── Unit Reminder Box ────────────────────────────── */
+  .unit-box {
+    background: var(--amber-tint);
+    border: 1px solid #F0D79A;
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 0.8rem;
+    color: var(--amber-text);
+  }
+  .unit-box strong { display: block; margin-bottom: 6px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ── Physiology Table ─────────────────────────────── */
+  .physio-table th:first-child { width: 130px; }
+  .plus-cell { color: #1A5C2A; font-weight: 600; }
+  .minus-cell { color: #8B1A10; font-weight: 600; }
+
+  /* ── Worked Examples ──────────────────────────────── */
+  .example-group {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .example-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--white);
+    cursor: pointer;
+    list-style: none;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    color: var(--navy);
+    user-select: none;
+    transition: background var(--transition);
+  }
+  .example-summary::-webkit-details-marker { display: none; }
+  .example-summary::marker { display: none; }
+  details[open] .example-summary {
+    background: var(--terra-tint);
+    border-bottom: 1px solid var(--terra-mid);
+  }
+  .example-summary:hover { background: #F5F1ED; }
+  details[open] .example-summary:hover { background: var(--terra-tint); }
+  .ex-num {
+    background: var(--terra);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .ex-chevron {
+    margin-left: auto;
+    color: var(--text-light);
+    font-size: 0.75rem;
+    transition: transform var(--transition);
+  }
+  details[open] .ex-chevron { transform: rotate(180deg); }
+  .example-body { padding: 0; }
+
+  /* ── Example Block sections ───────────────────────── */
+  .ex-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ex-section:last-child { border-bottom: none; }
+  .ex-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    margin-bottom: 8px;
+  }
+  .ex-given {
+    background: #F0F4FA;
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    color: var(--navy);
+    margin-top: 8px;
+    font-weight: 500;
+  }
+  .step-list { list-style: none; }
+  .step-list li {
+    display: flex;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.875rem;
+    align-items: flex-start;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    white-space: nowrap;
+    padding-top: 1px;
+    min-width: 72px;
+  }
+  .answer-box {
+    background: var(--navy);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+  }
+  .answer-box .answer-val {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: #fff;
+  }
+  .interpretation-box {
+    background: #F3F7FF;
+    border-left: 3px solid var(--navy);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--navy);
+  }
+  .physio-reasoning {
+    font-size: 0.875rem;
+  }
+  .physio-dir {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .dir-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .dir-badge.up { background: var(--green-tint); color: var(--green-text); }
+  .dir-badge.dn { background: var(--red-tint); color: var(--red-text); }
+  .physio-items { list-style: none; }
+  .physio-items li {
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--border);
+    color: var(--text-muted);
+    font-size: 0.855rem;
+    line-height: 1.55;
+  }
+  .physio-items li:last-child { border-bottom: none; }
+
+  /* ── Practice Problems ────────────────────────────── */
+  .practice-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .practice-instructions {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+  .practice-instructions ol {
+    padding-left: 18px;
+    margin-top: 6px;
+  }
+  .practice-instructions li { padding: 2px 0; }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 16px;
+  }
+  .section-divider-label {
+    background: var(--navy);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Question Card ────────────────────────────────── */
+  .q-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .q-header {
+    background: linear-gradient(135deg, var(--terra-tint) 0%, #FFF8F5 100%);
+    border-bottom: 1px solid var(--terra-mid);
+    padding: 13px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .q-number {
+    background: var(--terra);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .q-title {
+    font-weight: 600;
+    color: var(--navy);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+  .q-body { padding: 16px 18px; }
+  .q-scenario {
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.65;
+  }
+  .q-given-find {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .q-given, .q-find {
+    flex: 1;
+    min-width: 200px;
+    background: #F5F8FC;
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 0.8rem;
+  }
+  .q-given strong, .q-find strong {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    margin-bottom: 3px;
+  }
+  .q-given { border-left: 3px solid var(--navy); }
+  .q-find  { border-left: 3px solid var(--terra); }
+
+  /* ── Form Fields ──────────────────────────────────── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field.full { grid-column: 1 / -1; }
+
+  .field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field-hint {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: -3px;
+  }
+
+  input[type="text"].field-input,
+  textarea.field-input {
+    width: 100%;
+    border: 1.5px solid var(--border-mid);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    resize: vertical;
+  }
+  input[type="text"].field-input:hover,
+  textarea.field-input:hover {
+    border-color: var(--terra);
+  }
+  input[type="text"].field-input:focus,
+  textarea.field-input:focus {
+    outline: none;
+    border-color: var(--terra);
+    box-shadow: 0 0 0 3px rgba(184,74,30,0.18);
+  }
+  input[type="text"].field-input::placeholder,
+  textarea.field-input::placeholder { color: #B0A79E; font-style: italic; }
+
+  textarea.field-input { min-height: 88px; }
+  textarea.field-input.tall { min-height: 60px; }
+
+  /* ── Normal Range Row ─────────────────────────────── */
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .range-display {
+    font-size: 0.775rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+  .range-display strong { color: var(--green-text); font-style: normal; }
+
+  /* ── Radio Classification ─────────────────────────── */
+  .classify-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .classify-group legend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .classify-label {
+    position: relative;
+    cursor: pointer;
+  }
+  .classify-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .classify-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border: 1.5px solid var(--border-mid);
+    border-radius: 24px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--white);
+    transition: all var(--transition);
+    user-select: none;
+  }
+  .classify-label input:focus-visible + .classify-pill {
+    outline: 3px solid var(--terra);
+    outline-offset: 2px;
+  }
+  .classify-label.normal input:checked + .classify-pill {
+    background: var(--green-tint);
+    border-color: #4CAF50;
+    color: var(--green-text);
+  }
+  .classify-label.high input:checked + .classify-pill {
+    background: var(--red-tint);
+    border-color: #D32F2F;
+    color: var(--red-text);
+  }
+  .classify-label.low input:checked + .classify-pill {
+    background: var(--amber-tint);
+    border-color: #F9A825;
+    color: var(--amber-text);
+  }
+
+  /* ── Physiology Reasoning ─────────────────────────── */
+  .reasoning-section {
+    background: #F8F6F3;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-top: 4px;
+  }
+  .reasoning-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    margin-bottom: 8px;
+  }
+  .reasoning-prompt {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 12px;
+    line-height: 1.55;
+    padding: 8px 12px;
+    background: var(--white);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--terra);
+  }
+  .reasoning-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .reasoning-grid { grid-template-columns: 1fr; } }
+  .reasoning-item { display: flex; flex-direction: column; gap: 4px; }
+  .reasoning-dir {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    width: fit-content;
+    margin-bottom: 2px;
+  }
+  .reasoning-dir.up { background: var(--green-tint); color: var(--green-text); }
+  .reasoning-dir.dn { background: var(--red-tint); color: var(--red-text); }
+
+  /* ── Print Button ─────────────────────────────────── */
+  .print-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .print-bar p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .btn-print {
+    background: var(--terra);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .btn-print:hover { background: var(--terra-dark); }
+  .btn-print:active { transform: scale(0.98); }
+
+  /* ── Print Styles ─────────────────────────────────── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .page-header, .student-bar, .tab-nav-wrapper, .section-banner,
+    .info-box, .tab-panel:not(#panel-practice),
+    .practice-instructions, .print-bar,
+    .q-scenario, .q-given, .q-find,
+    .field-hint, .reasoning-prompt { display: none !important; }
+
+    body { background: #fff; font-size: 11pt; }
+    .tab-panel#panel-practice { display: block !important; }
+    .main-content { padding: 0; max-width: 100%; }
+
+    .print-header { display: block !important; }
+
+    .section-divider { page-break-before: auto; margin: 18pt 0 8pt; }
+    .section-divider-label { background: #333 !important; color: #fff !important; font-size: 8pt; }
+    .section-divider-line { display: none; }
+
+    .q-card {
+      border: 1pt solid #ccc;
+      page-break-inside: avoid;
+      margin-bottom: 10pt;
+      box-shadow: none;
+    }
+    .q-header {
+      background: #f0e8e0 !important;
+      padding: 8pt 10pt;
+    }
+    .q-number { background: #B84A1E !important; font-size: 7pt; padding: 2pt 7pt; }
+    .q-title { font-size: 10pt; color: #000; }
+    .q-body { padding: 8pt 10pt; }
+
+    .form-grid { grid-template-columns: 1fr 1fr; gap: 8pt; margin-bottom: 8pt; }
+    .field-label { font-size: 7pt; }
+
+    input[type="text"].field-input,
+    textarea.field-input {
+      border: 1pt solid #999;
+      font-size: 10pt;
+      padding: 4pt 6pt;
+      background: #fff !important;
+    }
+    textarea.field-input { min-height: 50pt; }
+    textarea.field-input.tall { min-height: 36pt; }
+
+    .classify-group { gap: 5pt; }
+    .classify-pill { border: 1pt solid #999; font-size: 8pt; padding: 3pt 10pt; }
+    .classify-label.normal input:checked + .classify-pill,
+    .classify-label.high input:checked + .classify-pill,
+    .classify-label.low input:checked + .classify-pill {
+      border-width: 2pt;
+      font-weight: 900;
+    }
+
+    .reasoning-section { background: #fafafa !important; border: 1pt solid #ddd; padding: 6pt; }
+    .reasoning-title { font-size: 7pt; }
+    .reasoning-grid { gap: 6pt; }
+    .reasoning-dir { font-size: 7pt; padding: 1pt 7pt; }
+
+    a[href]::after { content: none !important; }
+  }
+
+  .print-header {
+    display: none;
+    margin-bottom: 16pt;
+    border-bottom: 2pt solid #B84A1E;
+    padding-bottom: 10pt;
+  }
+  .print-header h1 { font-size: 16pt; font-weight: bold; }
+  .print-header p { font-size: 10pt; color: #555; margin-top: 3pt; }
+
+</style>
+</head>
+
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ── Page Header ── -->
+<header class="page-header" role="banner">
+  <div class="page-header-inner">
+    <p class="page-kicker">Human Physiology · Cardiovascular System</p>
+    <h1 class="page-title">Hemodynamic Calculations</h1>
+    <p class="page-subtitle">Teaching Worksheet · Worked Examples and Practice Problems</p>
+  </div>
+</header>
+
+<!-- ── Student Info ── -->
+<div class="student-bar" role="complementary" aria-label="Student information">
+  <div class="student-bar-inner">
+    <div class="student-field">
+      <label for="s-name">Name</label>
+      <input type="text" id="s-name" name="student_name" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="student-field">
+      <label for="s-date">Date</label>
+      <input type="text" id="s-date" name="student_date" placeholder="MM/DD/YYYY" autocomplete="off">
+    </div>
+    <div class="student-field">
+      <label for="s-section">Section</label>
+      <input type="text" id="s-section" name="student_section" placeholder="Section #" autocomplete="off">
+    </div>
+  </div>
+</div>
+
+<!-- ── Tab Navigation ── -->
+<div class="tab-nav-wrapper" role="navigation" aria-label="Worksheet sections">
+  <ul class="tab-nav" role="tablist">
+    <li role="presentation">
+      <button class="tab-btn" role="tab" id="tab-reference" aria-selected="true" aria-controls="panel-reference">
+        Part 1 · Reference Tables
+      </button>
+    </li>
+    <li role="presentation">
+      <button class="tab-btn" role="tab" id="tab-examples" aria-selected="false" aria-controls="panel-examples">
+        Part 2 · Worked Examples
+      </button>
+    </li>
+    <li role="presentation">
+      <button class="tab-btn" role="tab" id="tab-practice" aria-selected="false" aria-controls="panel-practice">
+        Part 3 · Practice Problems
+      </button>
+    </li>
+  </ul>
+</div>
+
+<main id="main-content" class="main-content">
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 1 — REFERENCE TABLES
+  ═════════════════════════════════════════════════ -->
+  <section id="panel-reference" class="tab-panel active" role="tabpanel" aria-labelledby="tab-reference" tabindex="0">
+
+    <div class="section-banner">
+      <h2>Part 1 · Reference Tables</h2>
+      <p>All formulas and physiology reasoning references. Keep this panel open while you work.</p>
+    </div>
+
+    <div class="info-box" role="note" aria-label="How to use this worksheet">
+      <h3>How to Use This Worksheet</h3>
+      <p style="font-size:0.875rem;color:var(--text-muted);">Use the tabs above to move between sections. Complete your work in <strong>Part 3</strong>, then use the Print button to save an answer sheet for Canvas submission.</p>
+      <ul class="strategy-steps" aria-label="Problem-solving strategy">
+        <li><span class="step-num" aria-hidden="true">1</span> Identify what you are solving for</li>
+        <li><span class="step-num" aria-hidden="true">2</span> Write the formula</li>
+        <li><span class="step-num" aria-hidden="true">3</span> Plug in values</li>
+        <li><span class="step-num" aria-hidden="true">4</span> Calculate</li>
+        <li><span class="step-num" aria-hidden="true">5</span> Compare to normal range</li>
+        <li><span class="step-num" aria-hidden="true">6</span> Interpret the physiology</li>
+      </ul>
+    </div>
+
+    <!-- Formula Reference -->
+    <div class="table-wrap" role="region" aria-label="Hemodynamic formula reference">
+      <table class="ref-table">
+        <caption>Hemodynamic Formula Reference</caption>
+        <thead>
+          <tr>
+            <th scope="col">Parameter</th>
+            <th scope="col">Formula</th>
+            <th scope="col">Normal Adult Range</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Cardiac Output (CO)</strong></td><td><span class="formula-cell">CO = HR × SV</span></td><td><span class="range-badge">4–8 L/min</span></td></tr>
+          <tr><td><strong>Cardiac Index (CI)</strong></td><td><span class="formula-cell">CI = CO / BSA</span></td><td><span class="range-badge">2.5–4.0 L/min/m²</span></td></tr>
+          <tr><td><strong>Stroke Volume (SV)</strong></td><td><span class="formula-cell">SV = EDV − ESV</span></td><td><span class="range-badge">60–100 mL/beat</span></td></tr>
+          <tr><td><strong>Ejection Fraction (EF)</strong></td><td><span class="formula-cell">EF = (SV / EDV) × 100</span></td><td><span class="range-badge">≥ 55%</span></td></tr>
+          <tr><td><strong>Mean Arterial Pressure (MAP)</strong></td><td><span class="formula-cell">MAP = DBP + ⅓(SBP − DBP)</span></td><td><span class="range-badge">70–100 mmHg</span></td></tr>
+          <tr><td><strong>Pulse Pressure (PP)</strong></td><td><span class="formula-cell">PP = SBP − DBP</span></td><td><span class="range-badge">30–50 mmHg</span></td></tr>
+          <tr><td><strong>Systemic Vascular Resistance (SVR)</strong></td><td><span class="formula-cell">SVR = [(MAP − CVP) / CO] × 80</span></td><td><span class="range-badge">800–1200 dynes·s/cm⁵</span></td></tr>
+          <tr><td><strong>Pulmonary Vascular Resistance (PVR)</strong></td><td><span class="formula-cell">PVR = [(mPAP − PCWP) / CO] × 80</span></td><td><span class="range-badge">20–130 dynes·s/cm⁵</span></td></tr>
+          <tr><td><strong>Shock Index (SI)</strong></td><td><span class="formula-cell">SI = HR / SBP</span></td><td><span class="range-badge">0.5–0.7</span></td></tr>
+          <tr><td><strong>Cardiac Reserve (CR)</strong></td><td><span class="formula-cell">CR = Max CO − Resting CO</span></td><td><span class="range-badge">4–5× resting CO</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Unit Reminders -->
+    <div class="unit-box" role="note" aria-label="Unit reminders">
+      <strong>Unit Reminders</strong>
+      <p>HR = bpm | SV = mL/beat | CO = L/min <em>(convert SV: mL ÷ 1000 = L)</em> | BSA = m² | CI = L/min/m²</p>
+      <p style="margin-top:6px;">MAP, CVP, mPAP, PCWP = mmHg | SVR, PVR = dynes·s/cm⁵ | EF = % | PP = mmHg</p>
+      <p style="margin-top:6px;"><em>The ×80 in SVR/PVR converts from mmHg·min/L to dynes·s/cm⁵ (standard resistance units).</em></p>
+    </div>
+
+    <!-- Physiology Reasoning Reference -->
+    <div class="table-wrap" role="region" aria-label="Physiology reasoning reference — causes of increase and decrease">
+      <table class="ref-table physio-table">
+        <caption>Physiology Reasoning Reference · What Causes Each Value to Rise or Fall?</caption>
+        <thead>
+          <tr>
+            <th scope="col">Parameter</th>
+            <th scope="col">↑ Increases with…</th>
+            <th scope="col">↓ Decreases with…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Heart Rate (HR)</strong></td>
+            <td class="plus-cell">Fever, sympathetic activation (NE/epi, β1), exercise, pain, anxiety, hypoxia, hyperthyroidism, hypovolemia (reflex tachycardia), caffeine, atropine</td>
+            <td class="minus-cell">Parasympathetic/vagal tone (ACh, M2), beta-blockers, hypothermia, hypothyroidism, endurance athletes (high vagal tone), digoxin, Ca²⁺ channel blockers</td>
+          </tr>
+          <tr>
+            <td><strong>Stroke Volume (SV)</strong></td>
+            <td class="plus-cell">Increased preload (more venous return/EDV = Frank-Starling), increased contractility (sympathetic, epi/NE, dobutamine), decreased afterload (vasodilation, ACE inhibitors), exercise</td>
+            <td class="minus-cell">Decreased preload (hemorrhage, dehydration, diuretics), decreased contractility (MI, acidosis, anoxia, cardiomyopathy, beta-blockers, Ca²⁺ channel blockers), increased afterload (hypertension, aortic stenosis, high SVR)</td>
+          </tr>
+          <tr>
+            <td><strong>Cardiac Output (CO)</strong></td>
+            <td class="plus-cell">Exercise (HR + SV both rise), fever (HR rises via SA node), sympathetic stimulation (epi/NE), pregnancy, hyperthyroidism, sepsis (early), inotropes (dobutamine)</td>
+            <td class="minus-cell">Heart failure (decreased SV), any shock state, beta-blockers, severe bradycardia, hypothermia, cardiac tamponade, extreme tachycardia (paradox: too-fast HR shortens fill time → decreased EDV → decreased SV)</td>
+          </tr>
+          <tr>
+            <td><strong>Ejection Fraction (EF)</strong></td>
+            <td class="plus-cell">Sympathetic stimulation (NE/epi increase Ca²⁺ entry, stronger cross-bridge cycling), exercise, positive inotropes (dobutamine, digoxin), reduced afterload (vasodilators, ACE inhibitors)</td>
+            <td class="minus-cell">Myocardial infarction (necrotic scar = lost contractile muscle), dilated cardiomyopathy, acidosis, hypoxia, severe tachycardia, high afterload (aortic stenosis, uncontrolled hypertension)</td>
+          </tr>
+          <tr>
+            <td><strong>MAP</strong></td>
+            <td class="plus-cell">Increased SVR (vasoconstriction from catecholamines, Ang II, vasopressors), increased CO (exercise, fluid loading), fluid retention (aldosterone, ADH), pain/anxiety (sympathetic surge)</td>
+            <td class="minus-cell">Decreased SVR (sepsis, anaphylaxis, ACE inhibitors, nitroglycerin), decreased CO (heart failure, hemorrhage, tamponade), diuretics (decreased volume decreases venous return and CO)</td>
+          </tr>
+          <tr>
+            <td><strong>Pulse Pressure (PP)</strong></td>
+            <td class="plus-cell">Increased SV (exercise, aortic regurgitation = blood leaks back so DBP falls sharply), arterial stiffness (aging, arteriosclerosis, SBP spikes higher), hyperthyroidism, anemia, AV fistula</td>
+            <td class="minus-cell">Decreased SV (cardiac tamponade, cardiogenic shock, aortic stenosis, hypovolemia), tachycardia (short diastole = decreased EDV = decreased SV = narrower PP)</td>
+          </tr>
+          <tr>
+            <td><strong>SVR</strong></td>
+            <td class="plus-cell">Sympathetic vasoconstriction (NE, α1 receptors), angiotensin II (RAAS activation), vasopressors (norepinephrine, vasopressin), hypothermia, hypovolemia (reflex vasoconstriction to protect BP)</td>
+            <td class="minus-cell">Vasodilation from sepsis (nitric oxide, cytokines), anaphylaxis (histamine), neurogenic shock (lost sympathetic tone), ACE inhibitors, nitrates, calcium channel blockers, heat</td>
+          </tr>
+          <tr>
+            <td><strong>PVR</strong></td>
+            <td class="plus-cell">Hypoxic pulmonary vasoconstriction (unique to lungs — low O₂ constricts, opposite of systemic), pulmonary hypertension, COPD, pulmonary fibrosis, recurrent PE, acidosis, hypothermia</td>
+            <td class="minus-cell">Supplemental oxygen, pulmonary vasodilators (sildenafil, inhaled nitric oxide, prostacyclins), correction of acidosis, rewarming the patient</td>
+          </tr>
+          <tr>
+            <td><strong>Shock Index (SI)</strong></td>
+            <td class="plus-cell">Increased HR (compensatory tachycardia from hemorrhage, sepsis, pain, anxiety raises the numerator), decreased SBP (any cause of hypotension — shock, vasodilation, pump failure — lowers the denominator)</td>
+            <td class="minus-cell">Restored blood pressure via fluids, vasopressors, or blood products (SBP rises = denominator rises), controlled heart rate by treating the underlying cause (HR falls = numerator falls)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 2 — WORKED EXAMPLES
+  ═════════════════════════════════════════════════ -->
+  <section id="panel-examples" class="tab-panel" role="tabpanel" aria-labelledby="tab-examples" tabindex="0">
+    <div class="section-banner">
+      <h2>Part 2 · Worked Examples</h2>
+      <p>10 clinical scenarios solved step-by-step. Click any example to expand it. Study the physiology reasoning — that's where the learning lives.</p>
+    </div>
+    <div id="examples-container" role="list" aria-label="Worked examples"></div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 3 — PRACTICE PROBLEMS
+  ═════════════════════════════════════════════════ -->
+  <section id="panel-practice" class="tab-panel" role="tabpanel" aria-labelledby="tab-practice" tabindex="0">
+
+    <!-- Print-only header -->
+    <div class="print-header" aria-hidden="true">
+      <h1>Hemodynamic Calculations Worksheet</h1>
+      <p>Human Physiology · Cardiovascular System · Practice Problems Answer Sheet</p>
+    </div>
+
+    <div class="section-banner">
+      <h2>Part 3 · Practice Problems</h2>
+      <p>25 problems. Complete all fields, then use the Print button to save your answer sheet for Canvas.</p>
+    </div>
+
+    <div class="practice-header">
+      <div class="practice-instructions">
+        <strong style="font-size:.875rem;color:var(--text);">For each problem:</strong>
+        <ol>
+          <li>Choose your formula from Part 1</li>
+          <li>Show all work step by step</li>
+          <li>State your answer with correct units</li>
+          <li>Select <strong>Normal / High / Low</strong></li>
+          <li>Complete the physiology reasoning — name one cause that increases and one that decreases this value, and explain the mechanism in a sentence</li>
+        </ol>
+      </div>
+    </div>
+
+    <form id="worksheet-form" novalidate aria-label="Hemodynamic calculations practice problems">
+      <div id="practice-container"></div>
+
+      <div class="print-bar" role="region" aria-label="Print and submit">
+        <p>When you're finished, print your answer sheet and upload it to Canvas.</p>
+        <button type="button" class="btn-print" onclick="window.print()" aria-label="Print answer sheet for Canvas submission">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Answer Sheet
+        </button>
+      </div>
+    </form>
+
+  </section>
+
+</main>
+
+<script>
+/* ────────────────────────────────────────────────────────────
+   DATA
+──────────────────────────────────────────────────────────── */
+const EXAMPLES = [
+  {
+    num:1, title:"Cardiac Output · Basic Calculation",
+    scenario:"Mr. Rivera is a 58-year-old man admitted to the telemetry unit after a cardiac stress test. His heart rate on the monitor reads 82 beats per minute. An echocardiogram from this morning showed a stroke volume of 68 mL per beat.",
+    given:"HR = 82 bpm | SV = 68 mL/beat",
+    find:"Cardiac Output (CO) — is this normal?",
+    steps:[
+      {label:"Formula",text:"CO = HR × SV"},
+      {label:"Convert SV",text:"68 mL ÷ 1000 = 0.068 L/beat"},
+      {label:"Plug in",text:"CO = 82 × 0.068"},
+      {label:"Calculate",text:"CO = 5.576 L/min ≈ 5.6 L/min"},
+      {label:"Compare",text:"Normal CO: 4–8 L/min → 5.6 L/min is NORMAL"}
+    ],
+    answer:"CO = 82 × 0.068 = 5.6 L/min — NORMAL",
+    interpretation:"Mr. Rivera's CO is within normal limits. The heart is pumping approximately his entire blood volume every minute at rest. No intervention needed based on CO alone.",
+    physio:{
+      label:"Cardiac Output (CO)",
+      increases:[
+        "<strong>Exercise:</strong> sympathetic activation increases HR (SA node fires faster) AND increases SV via Frank-Starling (more venous return stretches the ventricle). Both effects multiply to raise CO dramatically.",
+        "<strong>Fever:</strong> elevated body temperature directly accelerates SA node depolarization rate (~+10 bpm per 1°C increase). HR rises, driving CO higher.",
+        "<strong>Epinephrine:</strong> binds β1 receptors on SA node (↑ HR) and ventricular myocytes (↑ Ca²⁺ entry, ↑ contractility, ↑ SV). Both levers raised simultaneously.",
+        "<strong>Hyperthyroidism:</strong> thyroid hormone sensitizes the heart to catecholamines and directly increases SA node automaticity. Chronically elevated HR and SV produce a high resting CO."
+      ],
+      decreases:[
+        "<strong>Heart failure:</strong> damaged or ischemic myocardium loses contractile protein. Contractility falls, SV falls, and CO falls despite compensatory tachycardia.",
+        "<strong>Hemorrhage:</strong> blood loss decreases venous return, decreases EDV (Frank-Starling curve shifts down), decreases SV, and decreases CO even as HR reflexively rises.",
+        "<strong>Cardiac tamponade:</strong> fluid in the pericardial sac compresses the heart externally, restricts diastolic filling, decreases EDV, decreases SV, and decreases CO.",
+        "<strong>Extreme tachycardia (>170–180 bpm):</strong> diastolic filling time becomes so short that EDV falls significantly. SV drops enough that CO paradoxically decreases despite very fast HR."
+      ]
+    }
+  },
+  {
+    num:2, title:"Cardiac Index · Adjusting CO for Body Size",
+    scenario:"Ms. Thompson is a 72-year-old woman in the ICU after aortic valve replacement. Post-op cardiac output is 4.2 L/min. Body surface area was calculated as 1.55 m² from her height and weight.",
+    given:"CO = 4.2 L/min | BSA = 1.55 m²",
+    find:"Cardiac Index (CI) — is tissue perfusion adequate?",
+    steps:[
+      {label:"Formula",text:"CI = CO / BSA"},
+      {label:"Plug in",text:"CI = 4.2 / 1.55"},
+      {label:"Calculate",text:"CI = 2.71 L/min/m²"},
+      {label:"Compare",text:"Normal CI: 2.5–4.0 L/min/m² → 2.71 is low-normal but acceptable post-operatively."}
+    ],
+    answer:"CI = 4.2 / 1.55 = 2.71 L/min/m² — LOW-NORMAL (acceptable post-op)",
+    interpretation:"A CO of 4.2 L/min is adequate for a small woman (1.55 m²) but would represent a critically low output for a large man (2.0+ m²). CI below 2.0 indicates low-output state requiring intervention.",
+    physio:{
+      label:"Cardiac Index (CI)",
+      increases:[
+        "<strong>Exercise:</strong> proportionally increases CO, which directly raises CI. Elite athletes can achieve CI above 10 L/min/m² at peak exertion.",
+        "<strong>Early sepsis (warm/distributive):</strong> massive vasodilation drops afterload, LV ejects more easily, CO rises well above normal. CI is often above 5 in early septic shock — a paradoxically high value with dangerously low MAP.",
+        "<strong>Pregnancy:</strong> circulating blood volume increases ~40–50% by third trimester, increasing venous return, EDV, SV, and CO. CI rises correspondingly to meet fetal metabolic demands.",
+        "<strong>Hyperthyroidism:</strong> chronic sympathetic sensitization and direct myocardial effects chronically elevate both HR and contractility, raising CO and therefore CI."
+      ],
+      decreases:[
+        "<strong>Heart failure:</strong> reduced contractility decreases SV and CO. CI below 2.0 defines cardiogenic low-output state. CI below 1.8 is the threshold for cardiogenic shock.",
+        "<strong>Cardiac tamponade:</strong> pericardial fluid compresses right atrium and ventricle, restricts filling, decreases SV and CO. CI falls rapidly. Treatment is immediate pericardiocentesis.",
+        "<strong>Large body habitus with unchanged cardiac function:</strong> if BSA increases (weight gain, large patient) but CO stays the same, CI falls simply because the denominator grew.",
+        "<strong>Post-cardiac surgery:</strong> temporary myocardial stunning from cardioplegia and bypass reduces contractility. CI is typically monitored closely in the first 24–48 hours post-operatively."
+      ]
+    }
+  },
+  {
+    num:3, title:"Mean Arterial Pressure · MAP Calculation",
+    scenario:"A patient in the emergency department presents with acute chest pain. The nurse records a blood pressure of 148/92 mmHg. The physician asks for the MAP to assess perfusion pressure.",
+    given:"SBP = 148 mmHg | DBP = 92 mmHg",
+    find:"MAP — is organ perfusion adequate?",
+    steps:[
+      {label:"Formula",text:"MAP = DBP + ⅓(SBP − DBP)"},
+      {label:"Pulse pressure",text:"148 − 92 = 56 mmHg"},
+      {label:"Multiply",text:"⅓ × 56 = 18.7 mmHg"},
+      {label:"Calculate",text:"MAP = 92 + 18.7 = 110.7 mmHg ≈ 111 mmHg"},
+      {label:"Why DBP + ⅓?",text:"At rest, diastole occupies ~⅔ of the cardiac cycle. MAP is weighted toward diastolic pressure because the heart spends more time there."},
+      {label:"Compare",text:"Normal MAP: 70–100 mmHg → 111 mmHg is ELEVATED."}
+    ],
+    answer:"MAP = 92 + ⅓(56) = 111 mmHg — HIGH (Hypertension)",
+    interpretation:"MAP of 111 mmHg is above normal, indicating hypertension. Organ perfusion is more than adequate (minimum threshold = 65 mmHg), but the elevated MAP increases cardiac afterload. With chest pain, rule out hypertensive emergency.",
+    physio:{
+      label:"MAP",
+      increases:[
+        "<strong>Sympathetic activation (pain, anxiety, hemorrhage):</strong> NE release constricts arterioles (α1 receptors), increases SVR. Simultaneously increases HR and contractility via β1 receptors, increasing CO. Both levers raise MAP.",
+        "<strong>RAAS activation:</strong> renin released → angiotensin II produced → potent arteriolar vasoconstriction raises SVR and MAP. Aldosterone retains Na⁺ and water, increasing blood volume and CO.",
+        "<strong>ADH/vasopressin:</strong> released from posterior pituitary; binds V1 receptors on arterioles (vasoconstriction) and V2 receptors on kidney collecting ducts (water retention). Both raise MAP.",
+        "<strong>Fluid overload:</strong> increased blood volume increases venous return → EDV → SV (Frank-Starling) → CO → MAP."
+      ],
+      decreases:[
+        "<strong>Septic shock:</strong> bacterial toxins trigger endothelial release of nitric oxide (powerful vasodilator). Cytokines cause massive arteriolar dilation, dramatically reducing SVR. MAP falls despite high or normal CO.",
+        "<strong>Anaphylaxis:</strong> histamine from mast cells causes profound vasodilation and increased capillary permeability. SVR collapses, MAP falls rapidly. Epinephrine is first-line treatment.",
+        "<strong>ACE inhibitors (lisinopril, enalapril):</strong> block angiotensin-converting enzyme, prevent angiotensin II formation, reduce arteriolar tone. SVR falls, MAP falls. This is the therapeutic mechanism for treating hypertension.",
+        "<strong>Severe hemorrhage:</strong> blood volume falls → venous return falls → EDV falls (Frank-Starling) → SV falls → CO falls. Compensatory vasoconstriction may maintain MAP initially but eventually fails."
+      ]
+    }
+  },
+  {
+    num:4, title:"Stroke Volume and Ejection Fraction",
+    scenario:"Echocardiogram for Mr. Okafor, 65-year-old with dilated cardiomyopathy: EDV = 210 mL, ESV = 145 mL. Calculate SV and EF to assess disease severity.",
+    given:"EDV = 210 mL | ESV = 145 mL",
+    find:"Stroke Volume (SV) and Ejection Fraction (EF) — interpret both",
+    steps:[
+      {label:"SV formula",text:"SV = EDV − ESV = 210 − 145 = 65 mL/beat"},
+      {label:"EF formula",text:"EF = (SV / EDV) × 100 = (65 / 210) × 100 = 31%"},
+      {label:"Compare SV",text:"Normal SV: 60–100 mL → appears acceptable."},
+      {label:"Compare EF",text:"Normal EF: ≥55% → 31% is SEVERELY REDUCED."},
+      {label:"Discrepancy",text:"SV appears normal only because the ventricle is massively dilated (210 mL vs. normal ~130 mL). The heart compensates by stretching but ejects a much smaller fraction of its total volume."}
+    ],
+    answer:"SV = 65 mL (normal range but misleading) | EF = 31% SEVERELY REDUCED — HFrEF",
+    interpretation:"This is a critical teaching case: preserved SV can coexist with severely reduced EF in a dilated heart. Mr. Okafor qualifies for ICD therapy plus guideline-directed medical therapy including beta-blocker and ACE inhibitor or ARB.",
+    physio:{
+      label:"Ejection Fraction (EF)",
+      increases:[
+        "<strong>Sympathetic stimulation:</strong> NE and epi bind β1 receptors on ventricular myocytes → activates cAMP/PKA pathway → phosphorylates L-type calcium channels → more Ca²⁺ enters → stronger cross-bridge cycling → more complete ventricular emptying → higher EF.",
+        "<strong>Exercise:</strong> combines sympathetic augmentation of contractility with Frank-Starling preload increase. EF rises to 70–80% in well-conditioned athletes during intense effort.",
+        "<strong>Positive inotropic drugs (dobutamine, digoxin, milrinone):</strong> each through different mechanisms increases intracellular Ca²⁺ availability during systole, strengthening contraction and improving ejection.",
+        "<strong>Reduced afterload (vasodilators, ACE inhibitors):</strong> lower arterial pressure means the LV must overcome less resistance. The ventricle empties more completely, ESV falls, EF rises. Central to HF therapy."
+      ],
+      decreases:[
+        "<strong>Myocardial infarction:</strong> ischemic or necrotic myocardium cannot contribute to ejection force. Scar tissue is non-contractile. Large anterior MI from LAD occlusion can drop EF to 20–30% acutely.",
+        "<strong>Dilated cardiomyopathy:</strong> genetic, viral, or toxic injury causes progressive loss of contractile protein and myocyte death. The ventricle dilates and thins. Despite a large EDV, contractility is so poor that ESV remains high and EF falls severely.",
+        "<strong>Acidosis or hypoxia:</strong> both impair calcium handling in myocytes. Acidosis interferes with myofilament calcium sensitivity (troponin binds Ca²⁺ less effectively at low pH). Hypoxia disrupts ATP production needed for SR Ca²⁺ reuptake.",
+        "<strong>Elevated afterload (severe hypertension, critical aortic stenosis):</strong> the LV must generate enormous pressure to overcome the resistance. If contractility cannot keep up, the ventricle cannot fully empty (ESV rises) and EF falls — afterload mismatch."
+      ]
+    }
+  },
+  {
+    num:5, title:"Pulse Pressure · Narrow vs. Wide",
+    scenario:"ICU patient A has BP 90/78 mmHg. Patient B has BP 154/60 mmHg. Calculate pulse pressure for each and interpret the hemodynamic significance.",
+    given:"Patient A: SBP=90, DBP=78 | Patient B: SBP=154, DBP=60",
+    find:"Pulse Pressure for each — clinical interpretation",
+    steps:[
+      {label:"PP for A",text:"PP = SBP − DBP = 90 − 78 = 12 mmHg → NARROW"},
+      {label:"PP for B",text:"PP = 154 − 60 = 94 mmHg → WIDE"},
+      {label:"Interpret A",text:"Normal PP: 30–50 mmHg. PP of 12 = critically low SV, barely ejecting with each beat."},
+      {label:"Interpret B",text:"PP of 94 = very high SV, or aortic regurgitation (DBP falls sharply as blood leaks back), or rigid non-compliant arteries."}
+    ],
+    answer:"Patient A: PP = 12 mmHg NARROW | Patient B: PP = 94 mmHg WIDE",
+    interpretation:"PP is a rapid window into stroke volume. Narrow PP means the heart has very little to eject per beat. Wide PP means large ejection volume or backward regurgitation through the aortic valve. Patient A requires urgent hemodynamic evaluation.",
+    physio:{
+      label:"Pulse Pressure (PP)",
+      increases:[
+        "<strong>Aortic regurgitation:</strong> the aortic valve fails to close completely during diastole. Blood flows back into the LV. Aortic diastolic pressure falls sharply while systolic pressure remains high or rises. PP widens dramatically. Classic: water-hammer pulse.",
+        "<strong>Arterial stiffness (aging, arteriosclerosis):</strong> a healthy, elastic aorta buffers the pulse. A stiff aorta cannot expand, so systolic pressure spikes higher with each ejection. DBP may fall as recoil is lost. PP widens. This is why isolated systolic hypertension is common in elderly patients.",
+        "<strong>Increased stroke volume (exercise, hyperthyroidism, anemia, AV fistula):</strong> more blood ejected per beat means systolic pressure rises more per beat. PP widens proportionally with SV.",
+        "<strong>Severe bradycardia:</strong> long diastolic filling time increases EDV markedly (Frank-Starling), producing a very large SV with the next beat. PP can be wide in profound bradycardia."
+      ],
+      decreases:[
+        "<strong>Cardiac tamponade:</strong> pericardial fluid compresses the heart, ventricular filling is restricted, EDV is small, SV is small. PP narrows dramatically. Classic finding: pulsus paradoxus (PP narrows further during inspiration).",
+        "<strong>Cardiogenic shock:</strong> infarcted or severely failing myocardium cannot generate normal ejection force. SV falls, systolic pressure fails to rise normally. PP narrows. Narrow PP plus tachycardia in a patient with chest pain strongly suggests acute MI with pump failure.",
+        "<strong>Severe aortic stenosis:</strong> the narrowed valve opening restricts outflow and dampens the ejection pressure wave. The pulse is weak and slow-rising (pulsus parvus et tardus). PP narrows.",
+        "<strong>Hypovolemia or severe dehydration:</strong> decreased blood volume reduces EDV → SV → systolic pressure spike. PP narrows. Narrow PP combined with tachycardia in a trauma patient strongly suggests significant blood loss."
+      ]
+    }
+  },
+  {
+    num:6, title:"SVR · Septic Shock Pattern",
+    scenario:"Mrs. Nguyen is in the medical ICU with septic shock. PA catheter: MAP = 58 mmHg, CVP = 3 mmHg, CO = 8.4 L/min.",
+    given:"MAP = 58 mmHg | CVP = 3 mmHg | CO = 8.4 L/min",
+    find:"SVR — vasodilated or vasoconstricted?",
+    steps:[
+      {label:"Formula",text:"SVR = [(MAP − CVP) / CO] × 80"},
+      {label:"Gradient",text:"58 − 3 = 55 mmHg"},
+      {label:"Divide",text:"55 / 8.4 = 6.55"},
+      {label:"Calculate",text:"SVR = 6.55 × 80 = 524 dynes·s/cm⁵"},
+      {label:"Compare",text:"Normal SVR: 800–1200. SVR of 524 = markedly REDUCED = massive vasodilation."}
+    ],
+    answer:"SVR = [(58 − 3) / 8.4] × 80 = 524 dynes·s/cm⁵ — LOW | Distributive shock pattern",
+    interpretation:"Classic septic shock: HIGH CO + LOW SVR + LOW MAP. Bacterial toxins trigger massive vasodilation via nitric oxide and cytokines. Treatment: vasopressors (norepinephrine first-line) to raise SVR and restore MAP above 65 mmHg.",
+    physio:{
+      label:"SVR",
+      increases:[
+        "<strong>Sympathetic α1 receptor activation:</strong> norepinephrine binds α1 receptors on arteriolar smooth muscle cells → intracellular Ca²⁺ rises → smooth muscle contracts → lumen narrows → resistance increases. Mechanism of vasopressor drugs and the baroreceptor reflex response to low BP.",
+        "<strong>Angiotensin II (RAAS activation):</strong> produced when kidneys detect low perfusion pressure. One of the most potent vasoconstrictors in the body. Constricts arterioles throughout the systemic circulation, raises SVR, raises MAP.",
+        "<strong>Vasopressin (ADH at high doses):</strong> binds V1 receptors on vascular smooth muscle, causes vasoconstriction. At pharmacologic doses (vasopressin infusion for refractory septic shock) raises SVR significantly.",
+        "<strong>Hypothermia:</strong> peripheral cutaneous vasoconstriction is a normal thermoregulatory response to cold. Blood is shunted from skin to core. SVR rises. Cold patients have pale, clammy skin and elevated BP."
+      ],
+      decreases:[
+        "<strong>Sepsis/SIRS:</strong> bacterial endotoxins and cytokines (IL-1, TNF-α) trigger massive release of nitric oxide from endothelial cells. Nitric oxide directly relaxes arteriolar smooth muscle, dramatically reducing SVR. CO is high but MAP is dangerously low because resistance is nearly absent.",
+        "<strong>Anaphylaxis:</strong> histamine released from mast cells and basophils binds H1 receptors on arterioles → profound vasodilation and increased capillary permeability. SVR collapses within minutes. Epinephrine (α1 vasoconstriction) is life-saving.",
+        "<strong>Spinal cord injury (neurogenic shock):</strong> loss of sympathetic outflow below the injury level removes vasomotor tone from peripheral arterioles. SVR falls. Classic triad: hypotension, bradycardia (unopposed vagal tone), warm skin (no vasoconstriction).",
+        "<strong>ACE inhibitors, ARBs, calcium channel blockers, nitrates:</strong> these drug classes directly reduce arteriolar tone through different mechanisms. All reduce SVR and therefore afterload on the left ventricle."
+      ]
+    }
+  },
+  {
+    num:7, title:"Cardiogenic Shock · CO and SVR Together",
+    scenario:"Mr. Johnson, 62, arrives in the ICU after a large anterior STEMI. PA catheter: HR = 115 bpm, SV = 28 mL/beat, MAP = 54 mmHg, CVP = 16 mmHg.",
+    given:"HR=115 bpm | SV=28 mL/beat | MAP=54 mmHg | CVP=16 mmHg",
+    find:"CO and SVR — shock classification",
+    steps:[
+      {label:"CO",text:"CO = HR × SV = 115 × 0.028 = 3.22 L/min"},
+      {label:"SVR",text:"SVR = [(MAP − CVP) / CO] × 80 = [(54 − 16) / 3.22] × 80 = [38 / 3.22] × 80 = 944 dynes·s/cm⁵"},
+      {label:"Pattern",text:"LOW CO + HIGH CVP (venous congestion backed up behind failing pump) + HIGH-NORMAL SVR (baroreceptor compensation) = CARDIOGENIC SHOCK."}
+    ],
+    answer:"CO = 3.22 L/min LOW | SVR = 944 dynes·s/cm⁵ HIGH-NORMAL (compensatory vasoconstriction) | Pattern = CARDIOGENIC SHOCK",
+    interpretation:"Failing pump reduces CO. Baroreceptors detect low MAP, activate sympathetic nervous system, trigger vasoconstriction (raises SVR) trying to restore pressure. Do NOT give large fluid boluses (CVP already 16). Give inotropes (dobutamine) and pursue revascularization.",
+    physio:{
+      label:"SVR as Compensation in Shock",
+      increases:[
+        "<strong>Cardiogenic shock compensation:</strong> falling CO activates baroreceptors in the aortic arch and carotid sinus. These signal the cardiovascular center in the medulla oblongata, which increases sympathetic outflow. Arterioles constrict (α1 NE), SVR rises, trying to maintain MAP. Skin becomes pale, cool, clammy as blood is redirected from periphery to core organs.",
+        "<strong>Hypovolemic shock compensation:</strong> same baroreceptor reflex triggered by falling blood volume and pressure. Sympathetic activation produces vasoconstriction. SVR rises. The body also activates RAAS (Ang II vasoconstriction) and releases ADH (additional vasoconstriction plus water retention).",
+        "<strong>Pain and emotional stress:</strong> powerful sympathetic activators. Pain triggers a surge of NE and epinephrine, raising both HR and SVR.",
+        "<strong>Cold exposure:</strong> cutaneous vasoconstriction (α1 mediated) shunts blood away from skin to preserve core temperature. SVR rises, DBP rises, pulse pressure may narrow."
+      ],
+      decreases:[
+        "<strong>Dobutamine (positive inotrope with vasodilating properties):</strong> primarily a β1 agonist but also has mild β2 effects causing peripheral vasodilation. In cardiogenic shock, dobutamine increases contractility (raises CO) while slightly lowering SVR (reduces afterload), improving the hemodynamic profile from both directions.",
+        "<strong>Vasodilators in heart failure (nitroprusside, hydralazine, ACE inhibitors):</strong> directly relax arteriolar smooth muscle, reducing SVR and afterload. For a failing LV, lowering afterload allows more complete emptying, increases SV and CO even without improving contractility.",
+        "<strong>Neuraxial anesthesia (spinal or epidural):</strong> blocks sympathetic preganglionic neurons, removes vasomotor tone from peripheral arterioles below the block level. SVR falls, BP can drop significantly. Vasopressors are used prophylactically.",
+        "<strong>Fever (high temperature states):</strong> cutaneous vasodilation increases for heat dissipation. SVR falls as blood is directed to the skin surface for cooling."
+      ]
+    }
+  },
+  {
+    num:8, title:"Shock Index · Rapid Triage",
+    scenario:"Three patients arrive simultaneously in the ER. Patient 1: HR=88, BP=120/78. Patient 2: HR=118, BP=96/60. Patient 3: HR=134, BP=88/52. The triage nurse needs to rank severity.",
+    given:"Patient 1: HR=88, SBP=120 | Patient 2: HR=118, SBP=96 | Patient 3: HR=134, SBP=88",
+    find:"Shock Index for all three — priority ranking",
+    steps:[
+      {label:"Formula",text:"SI = HR / SBP | Normal: 0.5–0.7. Above 1.0 = significant compromise. Above 1.4 = critical."},
+      {label:"Patient 1",text:"SI = 88 / 120 = 0.73 → Borderline, monitor closely."},
+      {label:"Patient 2",text:"SI = 118 / 96 = 1.23 → ABOVE 1.0, significant compromise."},
+      {label:"Patient 3",text:"SI = 134 / 88 = 1.52 → CRITICAL, likely above 30% blood volume loss."}
+    ],
+    answer:"SI (Patient 1) = 0.73 BORDERLINE | SI (Patient 2) = 1.23 HIGH | SI (Patient 3) = 1.52 CRITICAL — Priority 1",
+    interpretation:"Shock Index rises when HR rises (numerator up) and/or SBP falls (denominator down) — exactly what happens in any shock state. Patient 3 needs immediate resuscitation.",
+    physio:{
+      label:"Shock Index (SI)",
+      increases:[
+        "<strong>Hemorrhagic shock:</strong> blood loss reduces venous return and CO, triggering baroreceptor-driven reflex tachycardia (HR rises, numerator rises). Simultaneously, reduced CO drops systolic BP (denominator falls). Both effects combined produce a sharply rising SI.",
+        "<strong>Septic shock:</strong> fever and inflammatory mediators drive tachycardia via direct SA node effects and sympathetic activation (HR rises). Massive vasodilation drops BP (denominator falls). SI can be very high in sepsis even with a normal or high CO.",
+        "<strong>Pulmonary embolism:</strong> obstruction of the pulmonary artery reduces LV preload, drops CO, drops BP. Reflexive tachycardia and hypoxia-driven adrenergic activation raise HR. SI rises. High SI with sudden onset dyspnea and pleuritic chest pain strongly suggests massive PE.",
+        "<strong>Pain and anxiety alone:</strong> can temporarily raise SI by increasing HR. This is why SI must always be interpreted in clinical context."
+      ],
+      decreases:[
+        "<strong>Successful fluid resuscitation:</strong> restoring blood volume increases venous return → SV → CO → SBP (denominator rises). Simultaneously, improved perfusion reduces sympathetic drive, allowing HR to slow (numerator falls). SI normalizes.",
+        "<strong>Vasopressors (norepinephrine):</strong> directly raise arteriolar tone via α1 receptors, increasing SBP. The denominator rises, SI falls. This is the primary hemodynamic goal in distributive shock resuscitation.",
+        "<strong>Beta-blockers (clinical caution):</strong> blunt the reflex tachycardia response to hemorrhage or shock. HR fails to rise appropriately. SI numerator stays low, masking the severity of blood loss. Shock Index is less reliable in patients on beta-blockers.",
+        "<strong>Rest and pain control:</strong> removing the sympathetic stimulus reduces HR (numerator falls) and stabilizes BP (denominator holds). SI improves without any change in the underlying pathology."
+      ]
+    }
+  },
+  {
+    num:9, title:"Working Backward · Finding HR from CO and SV",
+    scenario:"A patient in the ICU has a CO of 6.5 L/min and echocardiogram showing a stroke volume of 75 mL per beat. The telemetry monitor is temporarily malfunctioning. Back-calculate the heart rate.",
+    given:"CO = 6.5 L/min | SV = 75 mL/beat = 0.075 L/beat",
+    find:"Heart Rate (HR)",
+    steps:[
+      {label:"Rearrange",text:"CO = HR × SV rearranges to HR = CO / SV"},
+      {label:"Plug in",text:"HR = 6.5 / 0.075"},
+      {label:"Calculate",text:"HR = 86.7 bpm ≈ 87 bpm"},
+      {label:"Compare",text:"Normal HR: 60–100 bpm → 87 bpm = Normal Sinus Rhythm."}
+    ],
+    answer:"HR = CO / SV = 6.5 / 0.075 = 87 bpm — NORMAL",
+    interpretation:"Algebraic rearrangement is a fundamental skill. If any two of the three values (CO, HR, SV) are known, the third can always be solved. Essential when one monitor fails or when titrating therapy toward a CO target.",
+    physio:{
+      label:"Heart Rate (HR)",
+      increases:[
+        "<strong>Fever:</strong> elevated body temperature directly accelerates the metabolic rate of SA node cells. The rate of spontaneous phase 4 depolarization increases (~10 additional bpm per 1°C above normal).",
+        "<strong>Sympathetic stimulation (exercise, stress, pain, hemorrhage):</strong> norepinephrine binds β1 receptors on SA node cells → activates adenylyl cyclase → increases intracellular cAMP → accelerates opening rate of HCN (funny current) channels. The pacemaker potential reaches threshold faster. HR rises.",
+        "<strong>Epinephrine from adrenal medulla:</strong> same β1 mechanism as norepinephrine from nerve terminals, but delivered in a surge via the bloodstream during fight-or-flight. Also increases contractility (positive inotropy). Both HR and SV rise together.",
+        "<strong>Hypovolemia/hemorrhage (baroreceptor reflex):</strong> falling blood pressure reduces stretch on baroreceptors in the aortic arch and carotid sinus. They send fewer inhibitory signals to the cardiovascular center. Sympathetic output increases, vagal tone decreases, HR rises reflexively."
+      ],
+      decreases:[
+        "<strong>Parasympathetic (vagal) tone at rest:</strong> the vagus nerve (CN X) releases acetylcholine onto SA node M2 receptors → opens IKACh potassium channels → hyperpolarizes the cell → slows the rate of spontaneous depolarization. At rest, vagal tone keeps resting HR ~20–25 bpm below the SA node's intrinsic rate of 100 bpm.",
+        "<strong>Beta-blockers (metoprolol, atenolol, carvedilol):</strong> competitively block β1 receptors on SA node cells. Sympathetic stimulation cannot accelerate depolarization. HR is blunted during exercise and stress. Used therapeutically for hypertension, HF, arrhythmias.",
+        "<strong>Hypothyroidism:</strong> thyroid hormone normally upregulates β1 receptor expression and enhances catecholamine sensitivity in the heart. With thyroid deficiency, the heart becomes less responsive to sympathetic stimulation. Resting HR falls (bradycardia is a classic sign).",
+        "<strong>Hypothermia:</strong> reduced body temperature slows the metabolic rate of SA node cells. Phase 4 depolarization occurs more slowly. HR can fall dramatically in hypothermia, sometimes below 30 bpm. Intentionally induced in cardiac surgery."
+      ]
+    }
+  },
+  {
+    num:10, title:"Full Integrated Profile · Acute Decompensated Heart Failure",
+    scenario:"Mr. Chen, 68-year-old with known HF: HR=108, BP=86/64 mmHg, BSA=1.87 m², SV=38 mL, EDV=185 mL, ESV=147 mL, CVP=18 mmHg, mPAP=36 mmHg, PCWP=24 mmHg.",
+    given:"HR=108 | BP=86/64 | BSA=1.87 m² | SV=38 mL | EDV=185 mL | ESV=147 mL | CVP=18 mmHg | mPAP=36 mmHg | PCWP=24 mmHg",
+    find:"CO, CI, MAP, PP, EF, SVR, PVR — full clinical interpretation",
+    steps:[
+      {label:"CO = HR × SV",text:"108 × 0.038 = 4.1 L/min | LOW-NORMAL but concerning — tachycardia is maintaining it"},
+      {label:"CI = CO / BSA",text:"4.1 / 1.87 = 2.19 L/min/m² | LOW (below 2.5 threshold)"},
+      {label:"MAP",text:"64 + ⅓(86−64) = 64 + 7.3 = 71.3 mmHg | LOW-NORMAL, barely above 65"},
+      {label:"PP",text:"86 − 64 = 22 mmHg | NARROW (low SV)"},
+      {label:"EF",text:"(38 / 185) × 100 = 20.5% | SEVERELY REDUCED (HFrEF)"},
+      {label:"SVR",text:"[(71.3 − 18) / 4.1] × 80 = [53.3 / 4.1] × 80 = 1039 dynes·s/cm⁵ | HIGH (compensatory vasoconstriction)"},
+      {label:"PVR",text:"[(36 − 24) / 4.1] × 80 = [12 / 4.1] × 80 = 234 dynes·s/cm⁵ | ELEVATED (secondary pulmonary HTN from LHF)"}
+    ],
+    answer:"CO = 4.1 (low-normal) | CI = 2.19 LOW | MAP = 71 (marginal) | PP = 22 NARROW | EF = 20.5% SEVERELY REDUCED | SVR = 1039 HIGH | PVR = 234 ELEVATED",
+    interpretation:"Classic decompensated HFrEF. EF of 20.5% means the ventricle ejects only 1 in 5 mL it contains. Body compensates with tachycardia and vasoconstriction — but both worsen the situation. IV furosemide, vasodilators, consider dobutamine. ICU-level care required.",
+    physio:{
+      label:"Integrated HF context",
+      increases:[
+        "<strong>SVR rises in HF as compensatory response:</strong> sympathetic and RAAS activation try to maintain MAP by constricting arterioles. This is adaptive short-term but creates a vicious cycle — increased afterload makes it harder for the already-failing LV to eject, worsening SV and EF.",
+        "<strong>CVP and PCWP both rise:</strong> the failing heart cannot eject normally. Blood backs up behind the pump. Right-sided backup (high CVP) causes JVD and peripheral edema. Left-sided backup (high PCWP) causes pulmonary edema.",
+        "<strong>Tachycardia is compensatory:</strong> sympathetic activation increases HR to try to maintain CO despite falling SV. But tachycardia shortens diastolic filling time, reducing EDV, which further reduces SV — a vicious cycle.",
+        "<strong>PVR rises secondarily:</strong> left-sided congestion raises pulmonary capillary pressure. Chronic pulmonary hypertension develops. The RV must now pump against elevated PVR. RV failure (cor pulmonale) is a common endpoint in advanced left HF."
+      ],
+      decreases:[
+        "<strong>Diuretics (furosemide):</strong> reduce preload by increasing urine output. CVP falls, PCWP falls, pulmonary edema improves. SV may actually improve as the overloaded LV operates at a better point on the Frank-Starling curve (too much stretch is counterproductive).",
+        "<strong>Vasodilators (nitroglycerin, nitroprusside, ACE inhibitors):</strong> reduce afterload (SVR falls). The LV ejects against less resistance, empties more completely, ESV falls, SV rises, CO improves. Also reduce preload (venodilation), further decreasing filling pressures.",
+        "<strong>Positive inotropes (dobutamine, milrinone):</strong> increase intracellular Ca²⁺ availability during systole, improve contractility, increase EF, increase SV, increase CO. Used for acute decompensated HF when other measures are insufficient.",
+        "<strong>Cardiac resynchronization therapy (CRT pacemaker):</strong> in patients with LBBB and wide QRS, dyssynchronous contraction wastes energy and reduces effective SV. CRT restores coordinated contraction, improving EF by 5–10 percentage points in appropriate candidates."
+      ]
+    }
+  }
+];
+
+const QUESTIONS = [
+  // Section A
+  {
+    id:"q1", section:"A", sectionTitle:"Cardiac Output and Index",
+    title:"Cardiac Output (Q1)",
+    scenario:"A telemetry patient's monitor shows a heart rate of 74 beats per minute. The echocardiogram from this morning documented a stroke volume of 72 mL per beat.",
+    given:"HR = 74 bpm | SV = 72 mL/beat",
+    find:"Cardiac Output (CO) in L/min.",
+    normalRange:"4–8 L/min",
+    reasoningPrompt:"Think about what drives CO. How does the body change CO during exercise? What about during hemorrhage? What two physiological systems are responsible for each change?"
+  },
+  {
+    id:"q2", section:"A", sectionTitle:"Cardiac Output and Index",
+    title:"Cardiac Index (Q2)",
+    scenario:"A patient in the cardiac surgery ICU has a cardiac output of 5.8 L/min. The patient's body surface area is 2.1 m².",
+    given:"CO = 5.8 L/min | BSA = 2.1 m²",
+    find:"Cardiac Index (CI).",
+    normalRange:"2.5–4.0 L/min/m²",
+    reasoningPrompt:"Why does body size matter when interpreting CO? What condition would cause CI to be very HIGH despite a normal CO? What would cause CI to fall dangerously low?"
+  },
+  {
+    id:"q3", section:"A", sectionTitle:"Cardiac Output and Index",
+    title:"CO and CI After Cardiac Arrest (Q3)",
+    scenario:"After cardiac arrest, a patient achieves return of spontaneous circulation. Monitoring shows a stroke volume of 45 mL/beat, heart rate of 105 bpm, and BSA = 2.3 m².",
+    given:"SV = 45 mL/beat | HR = 105 bpm | BSA = 2.3 m²",
+    find:"CO in L/min AND Cardiac Index (CI). Interpret both.",
+    normalRange:"CO: 4–8 L/min | CI: 2.5–4.0 L/min/m²",
+    reasoningPrompt:"The elevated HR is likely compensatory tachycardia. What physiological mechanism drives this? If contractility improves post-resuscitation, what happens to SV and CO?"
+  },
+  {
+    id:"q4", section:"A", sectionTitle:"Cardiac Output and Index",
+    title:"Back-Calculate CO from CI (Q4)",
+    scenario:"A physician notes that a patient's cardiac index is 2.3 L/min/m² and the BSA is 1.8 m². The nurse needs the actual cardiac output to calculate SVR.",
+    given:"CI = 2.3 L/min/m² | BSA = 1.8 m²",
+    find:"Cardiac Output (CO). Hint: rearrange the CI formula.",
+    normalRange:"4–8 L/min",
+    reasoningPrompt:"What is the difference between a CI of 2.3 in a patient at rest vs. the same CI in a septic patient with high metabolic demand? What happens to CI when a patient develops cardiogenic shock?"
+  },
+  {
+    id:"q5", section:"A", sectionTitle:"Cardiac Output and Index",
+    title:"CO Comparison — Three Patients (Q5)",
+    scenario:"Three patients: Patient X — HR 55 bpm, SV 95 mL. Patient Y — HR 100 bpm, SV 55 mL. Patient Z — HR 78 bpm, SV 70 mL.",
+    given:"Patient X: HR=55, SV=95 mL | Patient Y: HR=100, SV=55 mL | Patient Z: HR=78, SV=70 mL",
+    find:"CO for all three. Which is highest? Does a faster HR always mean a higher CO?",
+    normalRange:"4–8 L/min per patient",
+    reasoningPrompt:"Patient X has a slow HR but large SV. What kind of patient fits this profile? What does chronic endurance training do to the heart that produces this pattern?"
+  },
+  // Section B
+  {
+    id:"q6", section:"B", sectionTitle:"Stroke Volume and Ejection Fraction",
+    title:"SV and EF — Normal Echo (Q6)",
+    scenario:"An echocardiogram shows end-diastolic volume of 140 mL and end-systolic volume of 58 mL at rest.",
+    given:"EDV = 140 mL | ESV = 58 mL",
+    find:"Stroke Volume (SV) AND Ejection Fraction (EF). Are both normal?",
+    normalRange:"SV: 60–100 mL/beat | EF: ≥ 55%",
+    reasoningPrompt:"EF reflects how completely the ventricle empties. What physiological mechanism increases the force of ejection and raises EF? What causes the ventricle to empty less completely, raising ESV and lowering EF?"
+  },
+  {
+    id:"q7", section:"B", sectionTitle:"Stroke Volume and Ejection Fraction",
+    title:"SV from EF — Hypertensive Patient (Q7)",
+    scenario:"A 71-year-old woman with hypertension has an ejection fraction of 45% and an end-diastolic volume of 160 mL.",
+    given:"EF = 45% | EDV = 160 mL",
+    find:"Stroke Volume (SV). Rearrange the EF formula to solve for SV.",
+    normalRange:"60–100 mL/beat",
+    reasoningPrompt:"Her EF is reduced. What does chronic hypertension do to the LV over time? Consider: how does chronically increased afterload eventually affect ESV and EF?"
+  },
+  {
+    id:"q8", section:"B", sectionTitle:"Stroke Volume and Ejection Fraction",
+    title:"Ischemic Cardiomyopathy — Change Over Time (Q8)",
+    scenario:"Mr. Patel, 59, with ischemic cardiomyopathy. Current echo: EDV=220 mL, ESV=170 mL. Last year: EDV=195 mL, ESV=140 mL.",
+    given:"Current: EDV=220, ESV=170 | Last year: EDV=195, ESV=140",
+    find:"SV and EF for both time points. Has his function improved or worsened?",
+    normalRange:"SV: 60–100 mL/beat | EF: ≥ 55%",
+    reasoningPrompt:"His ventricle is dilating (EDV increasing each year). Why does a failing heart dilate? What is this called in relation to Frank-Starling? At what point does dilation stop helping and start hurting?"
+  },
+  // Section C
+  {
+    id:"q9", section:"C", sectionTitle:"Blood Pressure Calculations",
+    title:"MAP — Hypertensive Patient (Q9)",
+    scenario:"A nurse records BP 162/98 mmHg on a patient with a severe headache. The physician requests the MAP.",
+    given:"SBP = 162 mmHg | DBP = 98 mmHg",
+    find:"MAP. What is the minimum MAP needed for organ perfusion? Is this patient above or below that threshold?",
+    normalRange:"70–100 mmHg",
+    reasoningPrompt:"What is driving this patient's elevated MAP — elevated CO, elevated SVR, or both? What physiological systems chronically elevate MAP in essential hypertension?"
+  },
+  {
+    id:"q10", section:"C", sectionTitle:"Blood Pressure Calculations",
+    title:"MAP and PP — Hemorrhagic Shock (Q10)",
+    scenario:"A patient in hemorrhagic shock has BP = 74/58 mmHg after receiving 2 liters of normal saline.",
+    given:"SBP = 74 mmHg | DBP = 58 mmHg",
+    find:"MAP. Is this above the critical perfusion threshold of 65 mmHg? Also calculate pulse pressure and interpret it.",
+    normalRange:"MAP: 70–100 mmHg | PP: 30–50 mmHg",
+    reasoningPrompt:"Why is PP narrow in hemorrhagic shock? Trace the mechanism from blood loss all the way to narrow PP using your knowledge of cardiac physiology."
+  },
+  {
+    id:"q11", section:"C", sectionTitle:"Blood Pressure Calculations",
+    title:"MAP and PP — Two Patient Comparison (Q11)",
+    scenario:"Calculate MAP and PP for two patients. Patient A: BP = 118/80 mmHg. Patient B: BP = 88/76 mmHg.",
+    given:"Patient A: SBP=118, DBP=80 | Patient B: SBP=88, DBP=76",
+    find:"MAP and PP for both. Which patient is more concerning and why?",
+    normalRange:"MAP: 70–100 mmHg | PP: 30–50 mmHg",
+    reasoningPrompt:"Patient B has a very narrow PP. Walk through the mechanism: what happened to stroke volume, and what likely caused it? Name two clinical conditions that classically produce a narrow PP."
+  },
+  {
+    id:"q12", section:"C", sectionTitle:"Blood Pressure Calculations",
+    title:"Septic Shock — MAP Goal Tracking (Q12)",
+    scenario:"Septic shock patient on norepinephrine. Goal: MAP ≥ 65 mmHg. BP at 12:00 = 88/50 mmHg. BP at 13:00 = 98/62 mmHg.",
+    given:"12:00 BP: 88/50 mmHg | 13:00 BP: 98/62 mmHg",
+    find:"MAP at both time points. Has the MAP goal been achieved at 13:00?",
+    normalRange:"≥ 65 mmHg (resuscitation goal)",
+    reasoningPrompt:"Norepinephrine raises MAP primarily by increasing SVR. Explain the α1 receptor mechanism. Why is MAP ≥ 65 mmHg chosen as the resuscitation goal rather than a higher target?"
+  },
+  // Section D
+  {
+    id:"q13", section:"D", sectionTitle:"Vascular Resistance",
+    title:"SVR — Normal Baseline (Q13)",
+    scenario:"PA catheter readings: MAP = 82 mmHg, CVP = 6 mmHg, CO = 5.2 L/min.",
+    given:"MAP = 82 mmHg | CVP = 6 mmHg | CO = 5.2 L/min",
+    find:"Systemic Vascular Resistance (SVR). Is the patient vasodilated, normal, or vasoconstricted?",
+    normalRange:"800–1200 dynes·s/cm⁵",
+    reasoningPrompt:"SVR is primarily controlled by arterioles. What part of the autonomic nervous system raises SVR? Name the neurotransmitter and receptor involved. What hormone also powerfully raises SVR?"
+  },
+  {
+    id:"q14", section:"D", sectionTitle:"Vascular Resistance",
+    title:"SVR Before and After Norepinephrine (Q14)",
+    scenario:"Before norepinephrine: MAP=55, CVP=4, CO=7.8 L/min. After norepinephrine: MAP=70, CVP=5, CO=6.2 L/min.",
+    given:"Before: MAP=55, CVP=4, CO=7.8 | After: MAP=70, CVP=5, CO=6.2",
+    find:"SVR before AND after norepinephrine. Did SVR increase? Explain the mechanism.",
+    normalRange:"800–1200 dynes·s/cm⁵",
+    reasoningPrompt:"Notice that CO slightly decreased after norepinephrine even though MAP improved. Explain this physiologically. What happens to LV afterload when SVR rises? Is this decrease in CO concerning here, and why or why not?"
+  },
+  {
+    id:"q15", section:"D", sectionTitle:"Vascular Resistance",
+    title:"PVR — Pulmonary Arterial Hypertension (Q15)",
+    scenario:"Pulmonary arterial hypertension patient: mPAP = 42 mmHg, PCWP = 10 mmHg, CO = 4.0 L/min.",
+    given:"mPAP = 42 mmHg | PCWP = 10 mmHg | CO = 4.0 L/min",
+    find:"Pulmonary Vascular Resistance (PVR). Is this elevated? What is the normal range?",
+    normalRange:"20–130 dynes·s/cm⁵",
+    reasoningPrompt:"A normal PCWP with a high mPAP means the problem is in the pulmonary arteries, not the left heart. What causes pulmonary arterioles to constrict? How does chronic hypoxia from COPD elevate PVR over time?"
+  },
+  // Section E
+  {
+    id:"q16", section:"E", sectionTitle:"Shock Index",
+    title:"Shock Index — Trauma Patient (Q16)",
+    scenario:"Trauma patient arrives by ambulance: BP = 96/64 mmHg, HR = 122 bpm after a motorcycle accident.",
+    given:"HR = 122 bpm | SBP = 96 mmHg",
+    find:"Shock Index. Classify severity and interpret hemodynamic stability.",
+    normalRange:"0.5–0.7 (normal) | >1.0 significant | >1.4 critical",
+    reasoningPrompt:"The elevated HR is a compensatory response. What physiological reflex drives tachycardia in hemorrhage? Trace the pathway from blood loss to fast heart rate using the baroreceptor reflex arc."
+  },
+  {
+    id:"q17", section:"E", sectionTitle:"Shock Index",
+    title:"Shock Index — Postpartum Hemorrhage (Q17)",
+    scenario:"Postpartum patient with sudden BP drop. Vitals: HR=138 bpm, BP=78/50 mmHg.",
+    given:"HR = 138 bpm | SBP = 78 mmHg",
+    find:"Shock Index. Classify: Normal (0.5–0.7) / Elevated (>0.7) / Significant (>1.0) / Critical (>1.4).",
+    normalRange:"0.5–0.7 normal | >1.4 critical",
+    reasoningPrompt:"In postpartum hemorrhage, blood loss triggers both falling SBP and rising HR simultaneously. Explain WHY both happen physiologically. What would happen to SVR in this patient right now and why?"
+  },
+  // Section F
+  {
+    id:"q18", section:"F", sectionTitle:"Multi-Step and Integrated Problems",
+    title:"Integrated Profile — Cardiogenic Shock? (Q18)",
+    scenario:"Mr. Davis, 70, admitted with hypotension. PA catheter: HR=124 bpm, SV=32 mL/beat, BSA=1.95 m², MAP=58 mmHg, CVP=14 mmHg, PCWP=22 mmHg.",
+    given:"HR=124 | SV=32 mL | BSA=1.95 m² | MAP=58 mmHg | CVP=14 mmHg",
+    find:"CO, CI, SVR, Shock Index. What shock type does this profile suggest?",
+    normalRange:"CO: 4–8 L/min | CI: 2.5–4.0 | SVR: 800–1200 | SI: 0.5–0.7",
+    reasoningPrompt:"Both CVP (14) and PCWP (22) are elevated. What does this tell you about where blood is backed up? Why would you NOT give IV fluids to this patient even though his MAP is low?"
+  },
+  {
+    id:"q19", section:"F", sectionTitle:"Multi-Step and Integrated Problems",
+    title:"Integrated Profile — Septic Shock (Q19)",
+    scenario:"Ms. Williams, recovering from sepsis. HR=102, BP=94/58 mmHg, CO=9.6 L/min, BSA=1.72 m², CVP=2 mmHg.",
+    given:"HR=102 | BP=94/58 | CO=9.6 L/min | BSA=1.72 m² | CVP=2 mmHg",
+    find:"MAP, CI, SVR, and Shock Index. Identify the shock type and explain each parameter's role.",
+    normalRange:"MAP: 70–100 | CI: 2.5–4.0 | SVR: 800–1200 | SI: 0.5–0.7",
+    reasoningPrompt:"Her CO is very high but her MAP is still low. How is this possible? What physiological mechanism of distributive shock explains this pattern? What is causing her arterioles to be dilated?"
+  },
+  {
+    id:"q20", section:"F", sectionTitle:"Multi-Step and Integrated Problems",
+    title:"Hypertension — CO vs. SVR Driver (Q20)",
+    scenario:"Hypertensive patient: HR=72, BP=158/96 mmHg, CO=5.4 L/min, CVP=8 mmHg.",
+    given:"HR=72 | BP=158/96 mmHg | CO=5.4 L/min | CVP=8 mmHg",
+    find:"MAP, PP, and SVR. Is the elevated BP primarily due to elevated CO or elevated SVR?",
+    normalRange:"MAP: 70–100 | PP: 30–50 | SVR: 800–1200",
+    reasoningPrompt:"Once you identify the driver of elevated MAP, what does that tell you about which medication class would be most appropriate? Compare a drug that reduces SVR to a drug that reduces CO."
+  },
+  {
+    id:"q21", section:"F", sectionTitle:"Multi-Step and Integrated Problems",
+    title:"Exercise Stress Test — Cardiac Reserve (Q21)",
+    scenario:"Exercise stress test. Rest: HR=68, SV=72 mL. Peak exercise: HR=165, SV=128 mL. BSA=1.9 m².",
+    given:"Rest: HR=68, SV=72 mL | Peak: HR=165, SV=128 mL | BSA=1.9 m²",
+    find:"Resting CO and CI. Peak CO and CI. Cardiac Reserve. By what multiple did CO increase?",
+    normalRange:"Resting CO: 4–8 L/min | Peak CI may reach 8–10+ L/min/m² in athletes",
+    reasoningPrompt:"Both HR AND SV increased during exercise. Explain the two separate physiological mechanisms for each: (1) What drives HR up? (2) What drives SV up? Think about the sympathetic system AND the Frank-Starling law."
+  },
+  {
+    id:"q22", section:"F", sectionTitle:"Multi-Step and Integrated Problems",
+    title:"Night Shift Full Hemodynamic Profile (Q22)",
+    scenario:"Night shift reassessment. HR=96, BP=102/78 mmHg, EDV=168 mL, ESV=110 mL, BSA=1.82 m², CVP=13 mmHg, mPAP=30 mmHg, PCWP=20 mmHg, CO=4.2 L/min.",
+    given:"HR=96 | BP=102/78 | EDV=168 mL | ESV=110 mL | BSA=1.82 m² | CVP=13 mmHg | mPAP=30 mmHg | PCWP=20 mmHg | CO=4.2 L/min",
+    find:"SV, EF, MAP, PP, CI, SVR, PVR. Build a complete hemodynamic profile. Compensated or decompensated?",
+    normalRange:"All parameters — refer to Part 1 reference table",
+    reasoningPrompt:"This patient has elevated filling pressures on both sides (CVP=13 right, PCWP=20 left). What does PCWP of 20 mmHg tell you about pulmonary capillary hydrostatic pressure? What happens to fluid balance in the lungs at this level, and what clinical sign would you expect?"
+  }
+];
+
+/* ────────────────────────────────────────────────────────────
+   RENDER WORKED EXAMPLES
+──────────────────────────────────────────────────────────── */
+function renderExamples() {
+  const container = document.getElementById('examples-container');
+  container.innerHTML = EXAMPLES.map(ex => `
+    <details class="example-group" role="listitem">
+      <summary class="example-summary" aria-label="Example ${ex.num}: ${ex.title}">
+        <span class="ex-num" aria-hidden="true">Example ${ex.num}</span>
+        <span>${ex.title}</span>
+        <span class="ex-chevron" aria-hidden="true">▼</span>
+      </summary>
+      <div class="example-body">
+        <div class="ex-section">
+          <p class="ex-section-label">Clinical Scenario</p>
+          <p style="font-size:.9rem;line-height:1.65;">${ex.scenario}</p>
+          <div class="ex-given" role="note" aria-label="Given and find">
+            <strong>Given:</strong> ${ex.given}<br>
+            <strong>Find:</strong> ${ex.find}
+          </div>
+        </div>
+        <div class="ex-section">
+          <p class="ex-section-label">Step-by-Step Solution</p>
+          <ul class="step-list" role="list">
+            ${ex.steps.map(s=>`<li><span class="step-label">${s.label}</span><span>${s.text}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div class="ex-section">
+          <p class="ex-section-label">Answer</p>
+          <div class="answer-box" role="region" aria-label="Answer for example ${ex.num}">
+            <p class="answer-val">${ex.answer}</p>
+          </div>
+        </div>
+        <div class="ex-section">
+          <p class="ex-section-label">Clinical Interpretation</p>
+          <div class="interpretation-box">${ex.interpretation}</div>
+        </div>
+        <div class="ex-section">
+          <p class="ex-section-label">Physiology Reasoning — What Causes ${ex.physio.label} to Change?</p>
+          <div class="physio-reasoning">
+            <div class="physio-dir">
+              <span class="dir-badge up" aria-hidden="true">↑ Increases</span>
+            </div>
+            <ul class="physio-items" aria-label="Factors that increase ${ex.physio.label}">
+              ${ex.physio.increases.map(i=>`<li>${i}</li>`).join('')}
+            </ul>
+            <div class="physio-dir" style="margin-top:12px">
+              <span class="dir-badge dn" aria-hidden="true">↓ Decreases</span>
+            </div>
+            <ul class="physio-items" aria-label="Factors that decrease ${ex.physio.label}">
+              ${ex.physio.decreases.map(d=>`<li>${d}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </details>
+  `).join('');
+}
+
+/* ────────────────────────────────────────────────────────────
+   RENDER PRACTICE PROBLEMS
+──────────────────────────────────────────────────────────── */
+function renderPractice() {
+  const container = document.getElementById('practice-container');
+  let currentSection = '';
+  let html = '';
+
+  QUESTIONS.forEach((q, idx) => {
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+      html += `
+        <div class="section-divider" role="separator" aria-label="Section ${q.section}: ${q.sectionTitle}">
+          <span class="section-divider-label">Section ${q.section} — ${q.sectionTitle}</span>
+          <span class="section-divider-line" aria-hidden="true"></span>
+        </div>`;
+    }
+
+    const qNum = idx + 1;
+    html += `
+      <article class="q-card" id="${q.id}" aria-labelledby="${q.id}-title">
+        <div class="q-header">
+          <span class="q-number" aria-hidden="true">Q${qNum}</span>
+          <h3 class="q-title" id="${q.id}-title">${q.title}</h3>
+        </div>
+        <div class="q-body">
+          <p class="q-scenario">${q.scenario}</p>
+          <div class="q-given-find">
+            <div class="q-given" role="note" aria-label="Given values"><strong>GIVEN</strong>${q.given}</div>
+            <div class="q-find" role="note" aria-label="Find"><strong>FIND</strong>${q.find}</div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label" for="${q.id}-formula">Formula(s) I Will Use</label>
+              <input type="text" class="field-input" id="${q.id}-formula" name="${q.id}_formula" placeholder="e.g., CO = HR × SV" aria-required="true">
+            </div>
+            <div class="form-field">
+              <label class="field-label" for="${q.id}-answer">Answer with Units</label>
+              <input type="text" class="field-input" id="${q.id}-answer" name="${q.id}_answer" placeholder="e.g., 5.3 L/min" aria-required="true">
+              <span class="field-hint" aria-label="Normal range: ${q.normalRange}">Normal range: ${q.normalRange}</span>
+            </div>
+          </div>
+
+          <div class="form-field full" style="margin-bottom:12px">
+            <label class="field-label" for="${q.id}-work">Work (Show All Steps)</label>
+            <textarea class="field-input" id="${q.id}-work" name="${q.id}_work" placeholder="Step 1: Formula…&#10;Step 2: Plug in…&#10;Step 3: Calculate…" rows="4" aria-required="true"></textarea>
+          </div>
+
+          <fieldset style="border:none;padding:0;margin-bottom:16px;">
+            <legend class="field-label">Classify This Value</legend>
+            <div class="classify-group" role="group" aria-label="Is this value normal, high, or low?">
+              <label class="classify-label normal">
+                <input type="radio" name="${q.id}_class" value="normal" aria-label="Normal">
+                <span class="classify-pill">✓ Normal</span>
+              </label>
+              <label class="classify-label high">
+                <input type="radio" name="${q.id}_class" value="high" aria-label="High">
+                <span class="classify-pill">↑ High</span>
+              </label>
+              <label class="classify-label low">
+                <input type="radio" name="${q.id}_class" value="low" aria-label="Low">
+                <span class="classify-pill">↓ Low</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="reasoning-section" role="group" aria-labelledby="${q.id}-reasoning-title">
+            <p class="reasoning-title" id="${q.id}-reasoning-title">Physiology Reasoning</p>
+            <div class="reasoning-prompt" role="note">${q.reasoningPrompt}</div>
+            <div class="reasoning-grid">
+              <div class="reasoning-item">
+                <span class="reasoning-dir up" aria-hidden="true">↑ Increase</span>
+                <label class="field-label" for="${q.id}-inc-cause">One cause that INCREASES this value:</label>
+                <input type="text" class="field-input" id="${q.id}-inc-cause" name="${q.id}_inc_cause" placeholder="Name the physiological cause" aria-required="true">
+                <label class="field-label" for="${q.id}-inc-mech" style="margin-top:6px">Mechanism:</label>
+                <textarea class="field-input tall" id="${q.id}-inc-mech" name="${q.id}_inc_mech" rows="2" placeholder="Explain the mechanism in a sentence…" aria-required="true"></textarea>
+              </div>
+              <div class="reasoning-item">
+                <span class="reasoning-dir dn" aria-hidden="true">↓ Decrease</span>
+                <label class="field-label" for="${q.id}-dec-cause">One cause that DECREASES this value:</label>
+                <input type="text" class="field-input" id="${q.id}-dec-cause" name="${q.id}_dec_cause" placeholder="Name the physiological cause" aria-required="true">
+                <label class="field-label" for="${q.id}-dec-mech" style="margin-top:6px">Mechanism:</label>
+                <textarea class="field-input tall" id="${q.id}-dec-mech" name="${q.id}_dec_mech" rows="2" placeholder="Explain the mechanism in a sentence…" aria-required="true"></textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>`;
+  });
+
+  container.innerHTML = html;
+}
+
+/* ────────────────────────────────────────────────────────────
+   TAB NAVIGATION
+──────────────────────────────────────────────────────────── */
+function initTabs() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('aria-controls');
+
+      tabs.forEach(t => {
+        t.setAttribute('aria-selected', 'false');
+        t.removeAttribute('tabindex');
+      });
+      panels.forEach(p => p.classList.remove('active'));
+
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById(target).classList.add('active');
+    });
+
+    // Arrow key navigation for tab list
+    tab.addEventListener('keydown', (e) => {
+      const tabArr = [...tabs];
+      const idx = tabArr.indexOf(tab);
+      if (e.key === 'ArrowRight') {
+        tabArr[(idx + 1) % tabArr.length].focus();
+      } else if (e.key === 'ArrowLeft') {
+        tabArr[(idx - 1 + tabArr.length) % tabArr.length].focus();
+      }
+    });
+  });
+}
+
+/* ────────────────────────────────────────────────────────────
+   LOCAL STORAGE (best-effort — may be blocked in iframes)
+──────────────────────────────────────────────────────────── */
+function saveData() {
+  try {
+    const form = document.getElementById('worksheet-form');
+    const data = {};
+    form.querySelectorAll('input, textarea').forEach(el => {
+      if (el.name) data[el.name] = el.type === 'radio' ? (el.checked ? el.value : undefined) : el.value;
+    });
+    // Merge radio groups
+    form.querySelectorAll('input[type="radio"]:checked').forEach(el => {
+      data[el.name] = el.value;
+    });
+    // Student fields
+    ['s-name','s-date','s-section'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    localStorage.setItem('hemo_worksheet_v1', JSON.stringify(data));
+  } catch(e) { /* silently ignore */ }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem('hemo_worksheet_v1');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([name, value]) => {
+      if (!value) return;
+      const el = document.querySelector(`[name="${name}"]`);
+      if (!el) {
+        // Student fields
+        const byId = document.getElementById(name);
+        if (byId) byId.value = value;
+        return;
+      }
+      if (el.type === 'radio') {
+        document.querySelectorAll(`[name="${name}"]`).forEach(r => {
+          r.checked = r.value === value;
+        });
+      } else {
+        el.value = value;
+      }
+    });
+  } catch(e) { /* silently ignore */ }
+}
+
+/* ────────────────────────────────────────────────────────────
+   INIT
+──────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderExamples();
+  renderPractice();
+  initTabs();
+  loadData();
+
+  // Auto-save on input
+  document.addEventListener('input', saveData);
+  document.addEventListener('change', saveData);
+
+  // Disable paste and drag-and-drop in all answer fields
+  document.querySelectorAll('input[type="text"].field-input, textarea.field-input').forEach(el => {
+    el.addEventListener('paste', e => e.preventDefault());
+    el.addEventListener('drop', e => e.preventDefault());
+  });
+});
+</script>
+
+</body>
+</html>
