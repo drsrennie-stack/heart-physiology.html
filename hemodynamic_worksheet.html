@@ -853,9 +853,21 @@
       font-size: 10pt;
       padding: 4pt 6pt;
       background: #fff !important;
+      overflow: visible !important;
+      height: auto !important;
+      min-height: 0 !important;
     }
-    textarea.field-input { min-height: 50pt; }
-    textarea.field-input.tall { min-height: 36pt; }
+    textarea.field-input {
+      min-height: 50pt;
+      resize: none;
+      overflow: visible !important;
+      height: auto !important;
+    }
+    textarea.field-input.tall {
+      min-height: 36pt;
+      overflow: visible !important;
+      height: auto !important;
+    }
 
     .classify-group { gap: 5pt; }
     .classify-pill { border: 1pt solid #999; font-size: 8pt; padding: 3pt 10pt; }
@@ -1876,10 +1888,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('input', saveData);
   document.addEventListener('change', saveData);
 
-  // Disable paste and drag-and-drop in all answer fields
+  // Disable paste and drag-and-drop; auto-expand textareas
   document.querySelectorAll('input[type="text"].field-input, textarea.field-input').forEach(el => {
     el.addEventListener('paste', e => e.preventDefault());
     el.addEventListener('drop', e => e.preventDefault());
+    if (el.tagName === 'TEXTAREA') {
+      const expand = () => {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+      };
+      el.addEventListener('input', expand);
+      setTimeout(expand, 150);
+    }
   });
 });
 </script>
